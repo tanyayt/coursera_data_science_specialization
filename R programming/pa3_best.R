@@ -32,12 +32,12 @@ best<-function(state,outcome){
                 return(state_outcome_data[1,2])
         }
         else if(outcome=="heart failure"){
-                state_outcome_data<-arrange(state_data,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure)
+                state_outcome_data<-arrange(state_data,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure,Hospital.Name)
                 return(state_outcome_data[1,2])
         }
 
         else if(outcome=="pneumonia"){
-                state_outcome_data<-arrange(state_data,Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia)
+                state_outcome_data<-arrange(state_data,Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia,Hospital.Name)
                 return(state_outcome_data[1,2])
         }
 }
