@@ -32,14 +32,17 @@ rankhospital<-function(state,outcome,num){
         #rank state_data based on outcome, state_outcome_data stores hospital names, from best to worst
         state_outcome_data<-data.frame()
         if(outcome=="heart attack"){
+                state_data<-filter(state_data,!is.na(state_data$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack))
                 state_outcome_data<-arrange(state_data,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack,Hospital.Name) #sorted
                 state_outcome_data<-na.omit(state_outcome_data[,2])
         }
         else if(outcome=="heart failure"){
+                state_data<-filter(state_data,!is.na(state_data$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure))
                 state_outcome_data<-arrange(state_data,Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure,Hospital.Name)
                 state_outcome_data<-na.omit(state_outcome_data[,2])
         }
         else if(outcome=="pneumonia"){
+                state_data<-filter(state_data,!is.na(state_data$Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia))
                 state_outcome_data<-arrange(state_data,Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia,Hospital.Name)
                 state_outcome_data<-na.omit(state_outcome_data[,2])
         }
@@ -53,7 +56,9 @@ rankhospital<-function(state,outcome,num){
         else if(class(as.numeric(num))=="numeric"){
                 num<-round(as.numeric(num)) #convert to a rounded value
                 if(num>length(state_outcome_data)){
-                       return(NA)
+                       message("The rank input is larger than
+                                the number of rows in the specified state")
+                        return(NA)
                 }
                 else return(state_outcome_data[as.numeric(num)])
         }
