@@ -14,9 +14,12 @@ rankall<-function(outcome,num="best"){#default for num is best
         }
         #check num is valid
         num<-tolower(num)
-        if(!(num=="best"|num=="worst"|is.numeric(num))){
-               message("invalid rank")
-                return(NA)
+        if(!(num=="best"|num=="worst")){
+                num<-as.numeric(num)
+                if(is.na(num)){
+                        message("invalid rank,not a number or best or worst")
+                        return(NA)
+                }
         }
 
 
@@ -79,7 +82,7 @@ rankall<-function(outcome,num="best"){#default for num is best
                 nth_outcome_data<-nth_outcome_data%>%
                 arrange(state,desc(rank_in_state))%>%
                 group_by(state)%>%
-                summarise(hosptial=first(hospital))
+                summarise(hospital=first(hospital))
                 return(nth_outcome_data[,1:2])
         }
         ##if no return values up to this point
