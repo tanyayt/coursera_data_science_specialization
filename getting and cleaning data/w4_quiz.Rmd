@@ -141,3 +141,10 @@ num<-length(grep("fiscal year end: June",edu_data_short$Special.Notes,ignore.cas
 # Question 5
 
 ##Q5.Answer
+
+##Notes on Using Rmarkdown
+Rmarkdown uses the folder wherer the .Rmd is stored as the working directory; thus, setwd() or getwd()
+won't work test here (after forcing the working directory to be elsewhere)
+```{r}
+getwd()
+```
