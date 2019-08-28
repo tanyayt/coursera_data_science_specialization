@@ -1,7 +1,8 @@
 ---
 title: "w4_quiz"
-author: "Tanya tan"
-date: "27/08/2019"
+author: "Tanya Tan"
+date created: "27/08/2019"
+date updated: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
 
@@ -9,16 +10,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# About (# is heading 1)
+# About
 This is an R markdown practice that tracks the codes used in Week 4 Quiz
+(*last updated: `r format(Sys.time(), '%d %B, %Y')`*)
 
 # Question 1(Q1)
 ## Q1.Code
-set working directory and download files
+download files
 ```{r}
-setwd("~/_GitHub/coursera-data-science-specialization/getting and cleaning data/w4_quiz_data")
 download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv",destfile="housingdata.csv")
-download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FPUMSDataDict06.pdf",destfile = "housingdata_codebook.pdf")
 housingdata<-read.csv("housingdata.csv",header=TRUE)
 ```
 review data
@@ -112,4 +112,32 @@ the answer is `r length(grep("^United",countryNames)) `
 
 # Question 4
 ## Q4.Code
+the gdp data is already stored in gdp_data;
+now download and read the eductional data
+```{r}
+
+download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv",destfile = "edu_data.csv")
+edu_data<-read.csv("edu_data.csv",header = TRUE)
+dim(edu_data)
+head(edu_data)
+```
+the head seems to be okay. Now tail
+```{r}
+tail(edu_data)
+```
+The country code is stored in CountryCode and the "fiscal year ends" wording appears in special notes
+```{r}
+library(dplyr)
+edu_data_short<-select(edu_data,CountryCode,Special.Notes)
+head(edu_data_short)
+```
+search "fical year end: June" and ignore cases
+```{r}
+edu_data_short[grep("fiscal year end: June",edu_data_short$Special.Notes,ignore.case = TRUE),]
+num<-length(grep("fiscal year end: June",edu_data_short$Special.Notes,ignore.case = TRUE))
+```
 ## Q4.Answer
+`r num`
+# Question 5
+
+##Q5.Answer
