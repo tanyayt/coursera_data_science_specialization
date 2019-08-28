@@ -13,3 +13,24 @@ knitr::opts_chunk$set(echo = TRUE)
 This file documents the process working through week 4 course project in data science/getting andcleaning data course. 
 
 * Naming Strategy: w4_proj_XXX where XXX stands for the file name
+
+# Load the data and store in w4_project_data.zip
+
+The following code is not in a code chunk on purpose so that it won't download the file in every refresh
+```{r download file}
+library(downloader)
+download("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",dest="w4_project_data.zip",mode="wb") #wb stands for write and binary
+unzip ("w4_project_data.zip")
+```
+# Merge training and test data set, with a flag variable for training or test
+```{r}
+directory<-getwd()
+
+```
+# Extracts only the measurements on the mean and std deviation for each measurement 
+
+# Use the descriptive activity names to name the activities in the data set 
+
+# Label the data set with descriptive names
+
+# Create a second independently tidy data set with the average of each variable for each activity and each subject 
