@@ -1,0 +1,15 @@
+---
+title: "w4_project"
+author: "Tanya Tan"
+date: "28/08/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## About
+This file documents the process working through week 4 course project in data science/getting andcleaning data course. 
+
+* Naming Strategy: w4_proj_XXX where XXX stands for the file name
