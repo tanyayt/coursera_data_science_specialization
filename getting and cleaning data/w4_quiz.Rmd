@@ -139,10 +139,51 @@ num<-length(grep("fiscal year end: June",edu_data_short$Special.Notes,ignore.cas
 ## Q4.Answer
 `r num`
 # Question 5
+load data and save the dataframe in date
+```{r load data for q5}
+library(quantmod)
+library(dplyr)
+library(lubridate)
+amzn = getSymbols("AMZN",auto.assign=FALSE)
+sampleTimes = index(amzn)
+date<-ymd(sampleTimes)
+date<-as.data.frame(date)
+colnames(date)<-"YMD"
+head(date)
+```
+create sampleyear
+```{r}
+date_backup<-date
+date<-date%>% mutate(sampleyear=year(YMD))
+head(date)
+```
+create sampleweekday
+```{r}
+date_backup2<-date
+date<-date %>% mutate(sampleweekday=weekdays(YMD))
+head(date)
+```
+find number of rows in 2012; find number of rows on Mondays
+```{r}
+record2012<-filter(date,sampleyear==2012)
+print("number of records in 2012:")
+nrow(record2012)
+print("number of records on Monday:")
+record2012monday<-filter(date,sampleweekday=="Monday"& sampleyear==2012)# note using & not && here
+nrow(record2012monday)
+```
 
-##Q5.Answer
+notice the difference between & and &&: (p.s. need an empty line before the list * to make the formatting work)
 
-##Notes on Using Rmarkdown
+* & and && indicate logical AND and | and || indicate logical OR. The shorter form performs elementwise comparisons in much the same way as arithmetic operators. The longer form evaluates left to right examining only the first element of each vector. Evaluation proceeds only until the result is determined. The longer form is appropriate for programming control-flow and typically preferred in if clauses.
+* Long form(&& or ||) short circuits, which means if it can identify the result by just validating just the first element. While doing &&, if the comparision of first two elements resulted in false, comparing next set of elements will also result in False. So, it returns false. While doing || if comparision resulted in true in first few elements, we can confidently say that any further validations will not change the result so it returns True.
+* Short forms continues to do for the entire vectors and creates a vector of results and returns it.
+
+## Q5.Answer
+year 2012 has `r nrow(record2012)` entries 
+year 2012 and monday has `r nrow(record2012monday)` entries
+
+# Notes on Using Rmarkdown
 Rmarkdown uses the folder wherer the .Rmd is stored as the working directory; thus, setwd() or getwd()
 won't work test here (after forcing the working directory to be elsewhere)
 ```{r}

@@ -829,12 +829,106 @@ head(edu_data_short)</code></pre>
 </div>
 <div id="q4.answer" class="section level2">
 <h2>Q4.Answer</h2>
-<p>13 # Question 5</p>
-<p>##Q5.Answer</p>
-<p>##Notes on Using Rmarkdown Rmarkdown uses the folder wherer the .Rmd is stored as the working directory; thus, setwd() or getwd() won’t work test here (after forcing the working directory to be elsewhere)</p>
+<p>13 # Question 5 load data and save the dataframe in date</p>
+<pre class="r"><code>library(quantmod)</code></pre>
+<pre><code>## Loading required package: xts</code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
+<pre><code>## 
+## Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     as.Date, as.Date.numeric</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;xts&#39;:
+##   method     from
+##   as.zoo.xts zoo</code></pre>
+<pre><code>## 
+## Attaching package: &#39;xts&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:dplyr&#39;:
+## 
+##     first, last</code></pre>
+<pre><code>## Loading required package: TTR</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;quantmod&#39;:
+##   method            from
+##   as.zoo.data.frame zoo</code></pre>
+<pre><code>## Version 0.4-0 included new data defaults. See ?getSymbols.</code></pre>
+<pre class="r"><code>library(dplyr)
+library(lubridate)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;lubridate&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:base&#39;:
+## 
+##     date</code></pre>
+<pre class="r"><code>amzn = getSymbols(&quot;AMZN&quot;,auto.assign=FALSE)</code></pre>
+<pre><code>## &#39;getSymbols&#39; currently uses auto.assign=TRUE by default, but will
+## use auto.assign=FALSE in 0.5-0. You will still be able to use
+## &#39;loadSymbols&#39; to automatically load data. getOption(&quot;getSymbols.env&quot;)
+## and getOption(&quot;getSymbols.auto.assign&quot;) will still be checked for
+## alternate defaults.
+## 
+## This message is shown once per session and may be disabled by setting 
+## options(&quot;getSymbols.warning4.0&quot;=FALSE). See ?getSymbols for details.</code></pre>
+<pre class="r"><code>sampleTimes = index(amzn)
+date&lt;-ymd(sampleTimes)
+date&lt;-as.data.frame(date)
+colnames(date)&lt;-&quot;YMD&quot;
+head(date)</code></pre>
+<pre><code>##          YMD
+## 1 2007-01-03
+## 2 2007-01-04
+## 3 2007-01-05
+## 4 2007-01-08
+## 5 2007-01-09
+## 6 2007-01-10</code></pre>
+<p>create sampleyear</p>
+<pre class="r"><code>date_backup&lt;-date
+date&lt;-date%&gt;% mutate(sampleyear=year(YMD))
+head(date)</code></pre>
+<pre><code>##          YMD sampleyear
+## 1 2007-01-03       2007
+## 2 2007-01-04       2007
+## 3 2007-01-05       2007
+## 4 2007-01-08       2007
+## 5 2007-01-09       2007
+## 6 2007-01-10       2007</code></pre>
+<p>create sampleweekday</p>
+<pre class="r"><code>date_backup2&lt;-date
+date&lt;-date %&gt;% mutate(sampleweekday=weekdays(YMD))
+head(date)</code></pre>
+<pre><code>##          YMD sampleyear sampleweekday
+## 1 2007-01-03       2007     Wednesday
+## 2 2007-01-04       2007      Thursday
+## 3 2007-01-05       2007        Friday
+## 4 2007-01-08       2007        Monday
+## 5 2007-01-09       2007       Tuesday
+## 6 2007-01-10       2007     Wednesday</code></pre>
+<p>find number of rows in 2012; find number of rows on Mondays</p>
+<pre class="r"><code>record2012&lt;-filter(date,sampleyear==2012)
+print(&quot;number of records in 2012:&quot;)</code></pre>
+<pre><code>## [1] &quot;number of records in 2012:&quot;</code></pre>
+<pre class="r"><code>nrow(record2012)</code></pre>
+<pre><code>## [1] 250</code></pre>
+<pre class="r"><code>print(&quot;number of records on Monday:&quot;)</code></pre>
+<pre><code>## [1] &quot;number of records on Monday:&quot;</code></pre>
+<pre class="r"><code>record2012monday&lt;-filter(date,sampleweekday==&quot;Monday&quot;&amp; sampleyear==2012)# note using &amp; not &amp;&amp; here
+nrow(record2012monday)</code></pre>
+<pre><code>## [1] 47</code></pre>
+<p>notice the difference between &amp; and &amp;&amp;: (p.s. need an empty line before the list * to make the formatting work)</p>
+<ul>
+<li>&amp; and &amp;&amp; indicate logical AND and | and || indicate logical OR. The shorter form performs elementwise comparisons in much the same way as arithmetic operators. The longer form evaluates left to right examining only the first element of each vector. Evaluation proceeds only until the result is determined. The longer form is appropriate for programming control-flow and typically preferred in if clauses.</li>
+<li>Long form(&amp;&amp; or ||) short circuits, which means if it can identify the result by just validating just the first element. While doing &amp;&amp;, if the comparision of first two elements resulted in false, comparing next set of elements will also result in False. So, it returns false. While doing || if comparision resulted in true in first few elements, we can confidently say that any further validations will not change the result so it returns True.</li>
+<li>Short forms continues to do for the entire vectors and creates a vector of results and returns it.</li>
+</ul>
+</div>
+<div id="q5.answer" class="section level2">
+<h2>Q5.Answer</h2>
+<p>year 2012 has 250 entries year 2012 and monday has 47 entries</p>
+</div>
+</div>
+<div id="notes-on-using-rmarkdown" class="section level1">
+<h1>Notes on Using Rmarkdown</h1>
+<p>Rmarkdown uses the folder wherer the .Rmd is stored as the working directory; thus, setwd() or getwd() won’t work test here (after forcing the working directory to be elsewhere)</p>
 <pre class="r"><code>getwd()</code></pre>
 <pre><code>## [1] &quot;C:/Users/ttan/Documents/_GitHub/coursera-data-science-specialization/getting and cleaning data&quot;</code></pre>
-</div>
 </div>
 
 
