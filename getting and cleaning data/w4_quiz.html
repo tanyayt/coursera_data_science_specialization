@@ -542,13 +542,26 @@ dim(gdp_data)</code></pre>
 </div>
 <div id="q2.answer" class="section level2">
 <h2>Q2.Answer</h2>
-<p>answer is 3.776524210^{5} # Question 3</p>
-</div>
-<div id="q3.code" class="section level2">
-<h2>Q3.Code</h2>
+<p>answer is 3.776524210^{5} # Question 3 ## Q3.Code gdp_data should now contains the information for 190 countries. Create a vector countryNames that stores all country names</p>
+<pre class="r"><code>head(gdp_data)</code></pre>
+<pre><code>##   code rank        country      gdp
+## 1  USA    1  United States 16244600
+## 2  CHN    2          China  8227103
+## 3  JPN    3          Japan  5959718
+## 4  DEU    4        Germany  3428131
+## 5  FRA    5         France  2612878
+## 6  GBR    6 United Kingdom  2471784</code></pre>
+<pre class="r"><code>countryNames&lt;-as.character(gdp_data$country) 
+#if not using as.character, it&#39;ll be loaded as factor
+head(countryNames)</code></pre>
+<pre><code>## [1] &quot;United States&quot;  &quot;China&quot;          &quot;Japan&quot;          &quot;Germany&quot;       
+## [5] &quot;France&quot;         &quot;United Kingdom&quot;</code></pre>
+<pre class="r"><code>countryNames[grep(&quot;^United&quot;,countryNames)]</code></pre>
+<pre><code>## [1] &quot;United States&quot;        &quot;United Kingdom&quot;       &quot;United Arab Emirates&quot;</code></pre>
 </div>
 <div id="q3.answer" class="section level2">
 <h2>Q3.Answer</h2>
+<p>the answer is 3</p>
 </div>
 </div>
 <div id="question-4" class="section level1">

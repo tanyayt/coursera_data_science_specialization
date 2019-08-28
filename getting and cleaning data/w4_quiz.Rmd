@@ -97,10 +97,18 @@ mean(gdp_data$gdp,na.rm = TRUE)
 ## Q2.Answer
 answer is `r mean(gdp_data$gdp,na.rm = TRUE)`
 # Question 3
-
 ## Q3.Code
-## Q3.Answer
+gdp_data should now contains the information for 190 countries. Create a vector countryNames that stores all country names
+```{r}
+head(gdp_data)
+countryNames<-as.character(gdp_data$country) 
+#if not using as.character, it'll be loaded as factor
+head(countryNames)
+countryNames[grep("^United",countryNames)]
+```
 
+## Q3.Answer
+the answer is `r length(grep("^United",countryNames)) `
 
 # Question 4
 ## Q4.Code
