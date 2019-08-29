@@ -16,17 +16,71 @@ This file documents the process working through week 4 course project in data sc
 
 # Load the data and store in w4_project_data.zip
 
-The following code is not in a code chunk on purpose so that it won't download the file in every refresh
 ```{r download file}
 library(downloader)
 download("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",dest="w4_project_data.zip",mode="wb") #wb stands for write and binary
 unzip ("w4_project_data.zip")
 ```
 # Merge training and test data set, with a flag variable for training or test
-```{r}
+
+## read X_test.txt and y_test.txt into dataframes x_test and y_test
+```{r load x_test y_test and the label files}
+##load x_test 
 directory<-getwd()
+testfilepath<-paste0(directory,"/UCI HAR Dataset/test/")
+Xtestfilepath<-paste0(testfilepath,"X_test.txt")
+x_test<-read.table(Xtestfilepath,header=FALSE)
+
+## load features.txt which contains the feature labels 
+featurefilepath<-paste0(directory,"/UCI HAR Dataset/features.txt")
+features<-read.table(featurefilepath,header=FALSE)
+featurename<-as.matrix(features[,2])
+## assign feature name to column names for x_test
+colnames(x_test)<-featurename
+str(x_test)
+
+## load y_test
+Ytestfilepath<-paste0(testfilepath,"y_test.txt")
+y_test<-data.frame()
+y_test<-read.table(Ytestfilepath,header=FALSE)
+colnames(y_test)<-c("num")
+str(y_test)
+```
+
+```{r}
+
+## load activity_labels.txt which are the activity associated with 1,2,3,4,5
+activityfilepath<-paste0(directory,"/UCI HAR Dataset/activity_labels.txt")
+activity_labels<-read.table(activityfilepath,header=FALSE)
+colnames(activity_labels)<-c("num","activity")
+str(activity_labels)
+
+## labeling in y_test
+library(dplyr)
+y_test_unnamed<-y_test #create a backup copy
+y_test<-left_join(y_test,activity_labels,by=c("num"="num"))
+head(y_test)
+```
+
+```{r}
+#load subject_test.txt
+Subjecttestfilepath<-paste0(testfilepath,"subject_test.txt")
+subject_test<-data.frame()
+subject_test<-read.table(Subjecttestfilepath,header=FALSE)
+colnames(subject_test)<-c("subject")
 
 ```
+
+## merge subject, x_test and y_test into sxy_test meaning subject-x-y
+```{r merge x_test,y_test, subject_test }
+sxy_test<-data.frame()
+sxy_test<-cbind.data.frame(subject_test,y_test$activity,x_test)
+#we also need to convert subject into factor
+sxy_test$subject<-factor(as.character(sxy_test$subject))
+str(sxy_test)
+```
+now sxy_test stores subject, 561 feacture measures, and activity
+
 # Extracts only the measurements on the mean and std deviation for each measurement 
 
 # Use the descriptive activity names to name the activities in the data set 
