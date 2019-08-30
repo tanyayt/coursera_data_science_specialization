@@ -1,0 +1,203 @@
+---
+title: "w4_project_note.Rmd"
+author: "Tanya Tan"
+output: 
+        html_document:
+                toc: true
+                toc_float: true
+                number_sections: true
+                theme: darkly
+---
+# Tips
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. 
+
+* Run code chunk *Ctrl+Shift+Enter*. 
+* Insert Chunk *Ctrl+Alt+I*.
+* Preview *Ctrl+Shift+K* (thinking K is Knitr)
+* Difference from R markdown: The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+## Tips TT
+        
+* use double colon "::" to specify an exact function in a package, e.g. dplyr::union
+        
+## About
+This file documents the process working through week 4 course project in data science/getting andcleaning data course. 
+
+* Naming Strategy: w4_proj_XXX where XXX stands for the file name
+
+## Download the data and store in w4_project_data.zip
+
+```{r download file}
+## uncomment, if file not yet downloaded
+## library(downloader)
+## download("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",dest="w4_project_data.zip",mode="wb") #wb stands for write and binary
+## unzip ("w4_project_data.zip")
+```
+# Import and consolidate subject,x,y data into sxy_data
+## consolidate x_test and x_train with selected features 
+### find selected features 
+feature_mean_std stores index of selected features
+feature_mean_std_names stores index and names of selected features
+```{r creates feature_mean_std which stores index of selected features;}
+directory<-getwd()
+featurefilepath<-paste0(directory,"/UCI HAR Dataset/features.txt")
+features<-read.table(featurefilepath,header=FALSE)
+colnames(features)<-c("index","featurename")
+head(features,4)
+#we only need featurenames containing "-mean()-" and "-std()-"
+feature_mean_std<-grep("mean|std",features$featurename,ignore.case = TRUE)
+length(feature_mean_std)
+feature_mean_std_names<-features[feature_mean_std,]
+head(feature_mean_std_names)
+``` 
+
+### read X_test.txt with selected features 
+```{r load X_test.txt and stores in x_test with selected features}
+testfilepath<-paste0(directory,"/UCI HAR Dataset/test/")
+Xtestfilepath<-paste0(testfilepath,"X_test.txt")
+x_test<-read.table(Xtestfilepath,header=FALSE)
+dim(x_test)
+##next extracting selected features
+x_test_backup<-x_test
+x_test<-x_test[,feature_mean_std]
+dim(x_test)
+```
+### read X_train.txt with selected features
+```{r load X_train.txt and stores in x_train with selected features}
+trainfilepath<-paste0(directory,"/UCI HAR Dataset/train/")
+Xtrainfilepath<-paste0(trainfilepath,"X_train.txt")
+x_train<-read.table(Xtrainfilepath,header=FALSE)
+dim(x_train)
+x_train_backup<-x_train
+x_train<-x_train[,feature_mean_std]
+dim(x_train)
+```
+### union x_test and x_train into x
+```{r union test and train with a flag}
+library(dplyr)
+x_test_backup<-x_test 
+x_test<-x_test%>%mutate(source="test")
+x_train_backup<-x_train
+x_tran<-x_train%>%mutate(source="train")
+x<-union_all(x_test,x_train)
+str(x)
+
+```
+### add feature names to x
+```{r add feature names to x}
+colnames(x)<-c(as.character(feature_mean_std_names$featurename),"source")
+```
+**at this point, x_test and x_train consolidation is done**
+
+## consolidate y_test and y_train with labels
+### load y_test.txt and store in y_test
+```{r load y_test.txt and store in y_test}
+Ytestfilepath<-paste0(testfilepath,"y_test.txt")
+y_test<-data.frame()
+y_test<-read.table(Ytestfilepath,header=FALSE)
+head(y_test,3)
+
+```
+### load y_train.txt and store in y_train
+```{r load y_train.txt and stores in y_train}
+ytrainfilepath<-paste0(trainfilepath,"y_train.txt")
+y_train<-read.table(ytrainfilepath,header=FALSE)
+head(y_train,3)
+```
+### union y_test and y_train into y
+```{r union y_test and y_train}
+dim(y_test)
+dim(y_train)
+y<-data.frame()
+#use union_all to maintain all rows
+y<-dplyr::union_all(y_test,y_train) 
+dim(y)
+```
+
+### load activity labels
+```{r load activity labels}
+
+## load activity_labels.txt which are the activity associated with 1,2,3,4,5
+activityfilepath<-paste0(directory,"/UCI HAR Dataset/activity_labels.txt")
+activity_labels<-read.table(activityfilepath,header=FALSE)
+colnames(activity_labels)<-c("num","activity")
+str(activity_labels)
+```
+### assign activity names to y
+```{r assign activity names to y}
+colnames(y)<-c("num")
+y_backup<-y #create a backup copy
+y<-dplyr::left_join(y,activity_labels,by=c("num"="num"))
+head(y)
+tail(y)
+```
+**up to this point, both x and y are clean data
+
+## consolidate subject_test and subject_train into subject 
+```{r load subject_test in subject_test}
+#load subject_test.txt
+Subjecttestfilepath<-paste0(testfilepath,"subject_test.txt")
+subject_test<-data.frame()
+subject_test<-read.table(Subjecttestfilepath,header=FALSE)
+colnames(subject_test)<-c("subject")
+```
+```{r load subject_train}
+Subjecttrainfilepath<-paste0(trainfilepath,"subject_train.txt")
+subject_train<-data.frame()
+subject_train<-read.table(Subjecttrainfilepath,header=FALSE)
+colnames(subject_train)<-c("subject")
+head(subject_train)
+```
+```{r union subject_test and subject_train into subject}
+subject<-data.frame()
+subject_backup<-subject
+subject<-dplyr::union_all(subject_test,subject_train)
+
+```
+
+## consolidate subject,x,y into sxydata
+```{r check subject,x and y, paged.print=TRUE}
+dim(subject)
+dim(x)
+dim(y)
+colnames(subject)
+colnames(y)
+colnames(x)
+```
+```{r consolidate subject,x,y$activity into sxydata}
+sxydata<-data.frame()
+subject$subject<-as.character(subject$subject)
+sxydata<-cbind.data.frame(subject,x,y$activity)
+head(sxydata,3)
+dim(sxydata)
+```
+
+# ----------UPDATING----------Clean Intertial Signals
+## What's in each file? 
+what is in each file? 
+```{r examine files body_acc_x_test.txt}
+body_acc_x_testpath<-paste0(testfilepath,"/Inertial Signals/body_acc_x_test.txt")
+body_acc_x_test<-read.table(body_acc_x_testpath,header=FALSE)
+str(body_acc_x_test)
+```
+
+```{r examine files body_acc_x_train.txt}
+body_acc_x_trainpath<-paste0(trainfilepath,"/Inertial Signals/body_acc_x_train.txt")
+body_acc_x_train<-read.table(body_acc_x_trainpath,header=FALSE)
+str(body_acc_x_train)
+```
+```{r union body_acc_x_test and body_acc_x_train to body_acc_x, in this order}
+body_acc_x<-union_all(body_acc_x_test,body_acc_x_train)
+str(body_acc_x)
+```
+```{r compute body_acc_x_mean}
+###########     START HERE #############
+```
+
+# Extracts only the measurements on the mean and std deviation for each measurement 
+
+# Use the descriptive activity names to name the activities in the data set 
+
+# Label the data set with descriptive names
+
+# Create a second independently tidy data set with the average of each variable for each activity and each subject 
