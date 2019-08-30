@@ -186,12 +186,20 @@ body_acc_x_trainpath<-paste0(trainfilepath,"/Inertial Signals/body_acc_x_train.t
 body_acc_x_train<-read.table(body_acc_x_trainpath,header=FALSE)
 str(body_acc_x_train)
 ```
+
+## ------UPDATING ---------Create body_acc_x_mean and body_acc_x_sd 
 ```{r union body_acc_x_test and body_acc_x_train to body_acc_x, in this order}
 body_acc_x<-union_all(body_acc_x_test,body_acc_x_train)
-str(body_acc_x)
+dim(body_acc_x)
 ```
-```{r compute body_acc_x_mean}
-###########     START HERE #############
+```{r compute body_acc_x_mean and body_acc_x_sd}
+body_acc_x_mean<-rowMeans(body_acc_x,na.rm = TRUE)
+body_acc_x_mean<-as.data.frame(body_acc_x_mean)
+colnames(body_acc_x_mean)<-c("body_acc_x_mean")
+
+#next, sd----------------START HERE
+body_acc_x<-as.matrix(body_acc_x)
+class(body_acc_x)
 ```
 
 # Extracts only the measurements on the mean and std deviation for each measurement 
