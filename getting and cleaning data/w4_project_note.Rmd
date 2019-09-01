@@ -168,44 +168,75 @@ colnames(x)
 sxydata<-data.frame()
 subject$subject<-as.character(subject$subject)
 sxydata<-cbind.data.frame(subject,x,y$activity)
-head(sxydata,3)
-dim(sxydata)
 ```
 
 # ----------UPDATING----------Clean Intertial Signals
+
 ## What's in each file? 
 what is in each file? 
 ```{r examine files body_acc_x_test.txt}
 body_acc_x_testpath<-paste0(testfilepath,"/Inertial Signals/body_acc_x_test.txt")
 body_acc_x_test<-read.table(body_acc_x_testpath,header=FALSE)
-str(body_acc_x_test)
+#str(body_acc_x_test)
 ```
 
 ```{r examine files body_acc_x_train.txt}
 body_acc_x_trainpath<-paste0(trainfilepath,"/Inertial Signals/body_acc_x_train.txt")
 body_acc_x_train<-read.table(body_acc_x_trainpath,header=FALSE)
-str(body_acc_x_train)
+#str(body_acc_x_train)
 ```
 
-## ------UPDATING ---------Create body_acc_x_mean and body_acc_x_sd 
+## Create body_acc_x_mean and body_acc_x_sd 
 ```{r union body_acc_x_test and body_acc_x_train to body_acc_x, in this order}
 body_acc_x<-union_all(body_acc_x_test,body_acc_x_train)
 dim(body_acc_x)
 ```
+## Extracts only the measurements on the mean and std deviation for each measurement 
 ```{r compute body_acc_x_mean and body_acc_x_sd}
-body_acc_x_mean<-rowMeans(body_acc_x,na.rm = TRUE)
-body_acc_x_mean<-as.data.frame(body_acc_x_mean)
-colnames(body_acc_x_mean)<-c("body_acc_x_mean")
+body_acc_x_backup<-data.frame()
+body_acc_x_backup<-body_acc_x
+#stores body_acc_x in _backup dataframe
+body_acc_x_mean<-rowMeans(body_acc_x,na.rm=TRUE)
 
-#next, sd----------------START HERE
-body_acc_x<-as.matrix(body_acc_x)
-class(body_acc_x)
+#install.packages("matrixStats")
+library(matrixStats)
+body_acc_x_sd<-matrixStats::rowSds(as.matrix(body_acc_x),na.rm = TRUE)
+body_acc_x_meansd<-cbind(body_acc_x_mean,body_acc_x_sd)
+colnames(body_acc_x_meansd)<-c("body_acc_x_mean","body_acc_x_sd")
+body_acc_x_meansd<-as.data.frame(body_acc_x_meansd)
+str(body_acc_x_meansd)
 ```
 
-# Extracts only the measurements on the mean and std deviation for each measurement 
+## write a function inersig_clean to execute the sequance of:import, union,mean,std calculation
 
-# Use the descriptive activity names to name the activities in the data set 
+```{r function_inersig_clean}
+inersig_clean<-function(iner_test_filename="",iner_train_filename=""){
+        #iner_test_filename is the filename of the test file, e.g. body_acc_y_test.txt
+        #iner_train_filename is the filename of the train file, e.g.                  body_acc_y_train.txt 
+        #the function takes two filenames as the input, load the files, and output a data frame with "mean" and "std" two variables
+        # 0. validation
+        # 1. Import test and train data         
+        iner_testpath<-paste0(testfilepath,"/Inertial Signals/",iner_test_filename)
+        iner_testdata<-read.table(iner_testpath,header=FALSE)        
+        iner_trainpath<-paste0(trainfilepath,"/Inertial Signals/",iner_train_filename)
+        iner_traindata<-read.table(iner_trainpath,header=FALSE) 
+        
+        # 2. Union two data sets 
+        iner_fulldata<-dplyr::union_all(iner_testdata,iner_traindata)
+        # 3. Compute mean and std
+        iner_mean<-rowMeans(iner_fulldata,na.rm = TRUE)
+        #library(matrixStats)
+        iner_sd<-matrixStats::rowSds(as.matrix(iner_fulldata),na.rm = TRUE)
+        iner_meansd<-as.data.frame()
+        iner_meansd<cbind(iner_mean,iner_sd)
+        colnames(iner_meansd)<-c("mean","sd")
+        return(iner_meansd)
+        
+}
 
-# Label the data set with descriptive names
+```
+
+
+
 
 # Create a second independently tidy data set with the average of each variable for each activity and each subject 
