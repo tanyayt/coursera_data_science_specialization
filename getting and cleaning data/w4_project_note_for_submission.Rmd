@@ -1,6 +1,5 @@
 ---
-title: "w4_project_note.Rmd"
-author: "Tanya Tan"
+title: "w4_project_note_for_submission.Rmd"
 output: 
         html_document:
                 toc: true
@@ -8,30 +7,17 @@ output:
                 number_sections: true
                 theme: darkly
 ---
-# Tips
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. 
-
-* Run code chunk *Ctrl+Shift+Enter*. 
-* Insert Chunk *Ctrl+Alt+I*.
-* Preview *Ctrl+Shift+K* (thinking K is Knitr)
-* Difference from R markdown: The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-
-## Tips TT
-        
-* use double colon "::" to specify an exact function in a package, e.g. dplyr::union
-        
 ## About
 This file documents the process working through week 4 course project in data science/getting andcleaning data course. 
 
-* Naming Strategy: w4_proj_XXX where XXX stands for the file name
 
 ## Download the data and store in w4_project_data.zip
 
 ```{r download file}
-## uncomment, if file not yet downloaded
-## library(downloader)
-## download("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",dest="w4_project_data.zip",mode="wb") #wb stands for write and binary
-## unzip ("w4_project_data.zip")
+#uncomment, if not yet downloaded
+# library(downloader)
+# download("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",dest="w4_project_data.zip",mode="wb") #wb stands for write and binary
+# unzip ("w4_project_data.zip")
 ```
 # Import and consolidate subject,x,y data into sxy_data
 ## consolidate x_test and x_train with selected features 
@@ -170,7 +156,19 @@ subject$subject<-as.character(subject$subject)
 sxydata<-cbind.data.frame(subject,x,y$activity)
 ```
 
-# ----------UPDATING----------Clean Intertial Signals
+# Clean Intertial Signals
+
+List of dataframes generated
+
+* body_acc_x_meansd
+* body_acc_y_meansd
+* body_acc_z_meansd
+* body_gyro_x_meansd
+* body_gyro_y_meansd
+* body_gyro_z_meansd
+* total_acc_x_meansd
+* total_acc_y_meansd
+* total_acc_z_meansd
 
 ## What's in each file? 
 what is in each file? 
@@ -224,19 +222,117 @@ inersig_clean<-function(iner_test_filename="",iner_train_filename=""){
         # 2. Union two data sets 
         iner_fulldata<-dplyr::union_all(iner_testdata,iner_traindata)
         # 3. Compute mean and std
-        iner_mean<-rowMeans(iner_fulldata,na.rm = TRUE)
+        iner_mean<-rowMeans(iner_fulldata,na.rm = TRUE) #iner_mean tested ok
         #library(matrixStats)
-        iner_sd<-matrixStats::rowSds(as.matrix(iner_fulldata),na.rm = TRUE)
-        iner_meansd<-as.data.frame()
-        iner_meansd<cbind(iner_mean,iner_sd)
+        iner_sd<-matrixStats::rowSds(as.matrix(iner_fulldata),na.rm = TRUE)#tested ok
+        iner_meansd<-cbind(iner_mean,iner_sd)
         colnames(iner_meansd)<-c("mean","sd")
+        iner_meansd<-as.data.frame(iner_meansd)
         return(iner_meansd)
         
 }
 
+#test for body_acc_x
+
+output<-inersig_clean("body_acc_x_test.txt","body_acc_x_train.txt")
+head(output)
+head(body_acc_x_meansd)
+
+```
+## Use inersig_clean function to combine and clean all inertial signals
+
+List of dataframes generated
+
+* body_acc_x_meansd
+* body_acc_y_meansd
+* body_acc_z_meansd
+* body_gyro_x_meansd
+* body_gyro_y_meansd
+* body_gyro_z_meansd
+* total_acc_x_meansd
+* total_acc_y_meansd
+* total_acc_z_meansd
+
+each data frame should have two variables, specifying the measure name, e.g "body_acc_x_mean" and "body_acc_y_mean"
+
+### Code
+```{r inersig_clean_body_acc_x}
+body_acc_x_meansd_backup<-body_acc_x_meansd
+body_acc_x_meansd<-inersig_clean("body_acc_x_test.txt","body_acc_x_train.txt")
+colnames(body_acc_x_meansd)<-c("body_acc_x_mean","body_acc_x_sd")
+str(body_acc_x_meansd)
+```
+
+```{r inersig_clean_body_acc_y}
+body_acc_ymeansd<-inersig_clean("body_acc_y_test.txt","body_acc_y_train.txt")
+colnames(body_acc_ymeansd)<-c("body_acc_y_mean","body_acc_y_sd")
+str(body_acc_ymeansd)
+```
+
+```{r inersig_clean_body_acc_z}
+body_acc_zmeansd<-inersig_clean("body_acc_z_test.txt","body_acc_z_train.txt")
+colnames(body_acc_zmeansd)<-c("body_acc_z_mean","body_acc_z_sd")
+str(body_acc_zmeansd)
+```
+
+```{r inersig_clean_body_gyro_x}
+body_gyro_xmeansd<-inersig_clean("body_gyro_x_test.txt","body_gyro_x_train.txt")
+colnames(body_gyro_xmeansd)<-c("body_gyro_x_mean","body_gyro_x_sd")
+str(body_gyro_xmeansd)
+```
+
+```{r inersig_clean_body_gyro_y}
+body_gyro_ymeansd<-inersig_clean("body_gyro_y_test.txt","body_gyro_y_train.txt")
+colnames(body_gyro_ymeansd)<-c("body_gyro_y_mean","body_gyro_y_sd")
+str(body_gyro_ymeansd)
+```
+
+```{r inersig_clean_body_gyro_z}
+body_gyro_zmeansd<-inersig_clean("body_gyro_z_test.txt","body_gyro_z_train.txt")
+colnames(body_gyro_zmeansd)<-c("body_gyro_z_mean","body_gyro_z_sd")
+str(body_gyro_zmeansd)
+```
+
+```{r inersig_clean_total_acc_x}
+total_acc_x_meansd<-inersig_clean("total_acc_x_test.txt","total_acc_x_train.txt")
+colnames(total_acc_x_meansd)<-c("total_acc_x_mean","total_acc_x_sd")
+str(total_acc_x_meansd)
+```
+
+```{r inersig_clean_total_acc_y}
+total_acc_y_meansd<-inersig_clean("total_acc_y_test.txt","total_acc_y_train.txt")
+colnames(total_acc_y_meansd)<-c("total_acc_y_mean","total_acc_y_sd")
+str(total_acc_y_meansd)
+```
+
+```{r inersig_clean_total_acc_z}
+total_acc_z_meansd<-inersig_clean("total_acc_z_test.txt","total_acc_z_train.txt")
+colnames(total_acc_z_meansd)<-c("total_acc_z_mean","total_acc_z_sd")
+str(total_acc_z_meansd)
 ```
 
 
+# Combine sxydata with the inertial signals into sxy_iner (final data set)
 
+```{r combine_sxy_data_inertial_sig}
+sxy_iner<-data.frame()
+sxy_iner<-cbind(sxydata,body_acc_x_meansd,body_acc_ymeansd,body_acc_zmeansd,
+                body_gyro_xmeansd,body_gyro_ymeansd,body_gyro_zmeansd,
+                total_acc_x_meansd,total_acc_y_meansd,total_acc_z_meansd)
+colnames(sxy_iner)[89]<-"activity"
+write.csv(sxy_iner,file="sxy_iner.csv")
+```
 
 # Create a second independently tidy data set with the average of each variable for each activity and each subject 
+
+```{r convert_sxy_iner_to_by_sub}
+library(dplyr)
+sxy_iner<-read.csv("sxy_iner.csv",header = TRUE)
+sxy_iner<-dplyr::select(sxy_iner,-source,-X)#remove source and index X
+sxy_iner$subject<-as.factor(sxy_iner$subject) #turn subject into a factor
+sxy_iner_summary<-sxy_iner%>% dplyr::group_by(subject,activity)%>%summarise_all(mean,na.rm=TRUE)
+
+head(sxy_iner_summary)
+write.table(sxy_iner_summary,file="sxy_iner_summary.csv",row.names = FALSE,sep=",")
+
+```

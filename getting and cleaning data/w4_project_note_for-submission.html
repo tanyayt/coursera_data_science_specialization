@@ -1532,9 +1532,10 @@ div.tocify {
 </div>
 <div id="download-the-data-and-store-in-w4_project_data.zip" class="section level2">
 <h2><span class="header-section-number">0.2</span> Download the data and store in w4_project_data.zip</h2>
-<pre class="r"><code>library(downloader)
-download(&quot;https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip&quot;,dest=&quot;w4_project_data.zip&quot;,mode=&quot;wb&quot;) #wb stands for write and binary
-unzip (&quot;w4_project_data.zip&quot;)</code></pre>
+<pre class="r"><code>#uncomment, if not yet downloaded
+# library(downloader)
+# download(&quot;https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip&quot;,dest=&quot;w4_project_data.zip&quot;,mode=&quot;wb&quot;) #wb stands for write and binary
+# unzip (&quot;w4_project_data.zip&quot;)</code></pre>
 </div>
 <div id="import-and-consolidate-subjectxy-data-into-sxy_data" class="section level1">
 <h1><span class="header-section-number">1</span> Import and consolidate subject,x,y data into sxy_data</h1>
@@ -2087,10 +2088,11 @@ write.csv(sxy_iner,file=&quot;sxy_iner.csv&quot;)</code></pre>
 </div>
 <div id="create-a-second-independently-tidy-data-set-with-the-average-of-each-variable-for-each-activity-and-each-subject" class="section level1">
 <h1><span class="header-section-number">4</span> Create a second independently tidy data set with the average of each variable for each activity and each subject</h1>
-<pre class="r"><code>sxy_iner&lt;-read.csv(&quot;sxy_iner.csv&quot;,header = TRUE)
+<pre class="r"><code>library(dplyr)
+sxy_iner&lt;-read.csv(&quot;sxy_iner.csv&quot;,header = TRUE)
 sxy_iner&lt;-dplyr::select(sxy_iner,-source,-X)#remove source and index X
 sxy_iner$subject&lt;-as.factor(sxy_iner$subject) #turn subject into a factor
-sxy_iner_summary&lt;-sxy_iner%&gt;%group_by(subject,activity)%&gt;%summarise_all(mean,na.rm=TRUE)
+sxy_iner_summary&lt;-sxy_iner%&gt;% dplyr::group_by(subject,activity)%&gt;%summarise_all(mean,na.rm=TRUE)
 
 head(sxy_iner_summary)</code></pre>
 <pre><code>## # A tibble: 6 x 106
@@ -2154,7 +2156,7 @@ head(sxy_iner_summary)</code></pre>
 ## #   body_gyro_z_mean &lt;dbl&gt;, body_gyro_z_sd &lt;dbl&gt;, total_acc_x_mean &lt;dbl&gt;,
 ## #   total_acc_x_sd &lt;dbl&gt;, total_acc_y_mean &lt;dbl&gt;, total_acc_y_sd &lt;dbl&gt;,
 ## #   total_acc_z_mean &lt;dbl&gt;, ...</code></pre>
-<pre class="r"><code>write.csv(sxy_iner_summary,file=&quot;sxy_iner_summary.csv&quot;)</code></pre>
+<pre class="r"><code>write.table(sxy_iner_summary,file=&quot;sxy_iner_summary.csv&quot;,row.names = FALSE,sep=&quot;,&quot;)</code></pre>
 </div>
 
 
