@@ -1,0 +1,198 @@
+---
+title: "proj1.Rmd"
+output: 
+        html_document:
+                toc: true
+                toc_float: true
+                number_sections: true
+                theme: darkly
+---
+# About {-}
+
+This document includes all the notes, codes, and thought processes for week 1 project
+
+## Submission Notes
+
+repo link: https://github.com/tanyayt/coursera_public/tree/master/exploratory_data_analysis_w1_proj
+
+
+
+## Plan
+
+        * 1. Read and understand the data discription
+        * 2. Use this file as the ultimate analysis log
+        * 3. Export using purl, to R code for submission
+        
+## Data Source
+
+[ref](https://www.coursera.org/learn/exploratory-data-analysis/peer/ylVFo/course-project-1)
+
+*Description*: Measurements of electric power consumption in one household with a one-minute sampling rate over a period of almost 4 years. Different electrical quantities and some sub-metering values are available.
+
+*Variables*:
+
+        - Date: Date in format dd/mm/yyyy
+        - Time: time in format hh:mm:ss
+        - Global_active_power: household global min-avg active power (kw)
+        - Global_reactive_power: household global min-avg reactive power (kw)
+        - Voltage: minute-averaged voltage (in V)
+        - Global_intensity: household global min-avg current intensity (Amp)
+        - Sub_metering_1: energy sub-metering No. 1 (in watt-hour of active energy). It corresponds to the kitchen, containing mainly a dishwasher, an oven and a microwave (hot plates are not electric but gas powered).
+        - Sub_metering_2: energy sub-metering No. 2 (in watt-hour of active energy). It corresponds to the laundry room, containing a washing-machine, a tumble-drier, a refrigerator and a light.
+        - Sub_metering_3: energy sub-metering No. 3 (in watt-hour of active energy). It corresponds to an electric water-heater and an air-conditioner.
+        
+# Download and Import Data
+## Download
+
+change eval to TRUE, if you haven't downloaded the file
+```{r download-data,eval=FALSE}
+library(downloader)
+downloader::download("https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip",destfile="proj1_power_consumption.zip")
+unzip("proj1_power_consumption.zip")
+```
+
+## Import and Clean 
+
+### sample_data
+```{r import_sample}
+sample_data<-data.frame()
+sample_data<-read.table("household_power_consumption.txt",skip=grep("1/2/2007",readLines("household_power_consumption.txt")),nrows = 100,sep = ";",header=TRUE)
+head(sample_data)
+```
+
+from the output, we know the date for Feb 1, 2017 is actually coded as "1/2/2007"
+
+```{r import_sample_2}
+sample_data<-data.frame()
+sample_data<-read.table("household_power_consumption.txt",skip=grep("2/2/2007",readLines("household_power_consumption.txt")),nrows = 100,sep = ";",header=TRUE,na.strings = c("?",""))
+head(sample_data)
+```
+as expected, Feb 2, 2017 is coded as "2/2/2007"
+
+### selectlively import data in consump dataframe
+```{r select_import_consump}
+# prepration - uncomment if not installed
+# install.packages("sqldf")
+library(sqldf)
+consump<-data.frame()
+consump<-read.csv.sql(
+        file="household_power_consumption.txt",
+        sql = "SELECT * FROM file WHERE Date IN ('1/2/2007','2/2/2007') ",
+        header=TRUE,
+        sep=";",
+        row.names=FALSE,
+        colClasses="character"
+        )
+head(consump)
+
+```
+
+```{r examine_data}
+# must use fixed = TRUE, since "?" is a special character 
+# or use "\\?""
+length(grep("?",consump,fixed = TRUE)) 
+
+```
+
+```{r backup}
+write.csv(consump,file="consump_data_20070201_20070202.csv",row.names = FALSE) 
+#create a backup copy
+```
+
+```{r backup_reassign}
+consump<-read.csv("consump_data_20070201_20070202.csv",header = TRUE,sep=",")
+
+```
+
+```{r clean_consump}
+library(dplyr)
+consump$Date<-as.Date(consump$Date,"%d/%m/%Y") #must use capital Y for                                                      #four-digit year
+consump<-dplyr::mutate(consump,date_time=paste0(Date," ",Time))
+consump$date_time<-strptime(consump$date_time,"%Y-%m-%d %H:%M:%S")
+summary(consump$date_time)
+head(consump$date_time)
+```
+
+up to this point, the data is clean
+
+```{r examine_columns}
+summary(consump)
+
+```
+
+
+
+# Plot
+
+The overall goal is to examine how household energy useage varies over the two days. 
+
+## Plot 1
+```{r plot1}
+png("plot1.png",width =480, height = 480,units = "px")
+plot1<-function(){
+        hist(consump$Global_active_power,main = "Global Active Power",
+     col = "red",xlab = "Global Active Power (killowatts)")
+}
+plot1()
+dev.off()
+```
+
+## Plot 2
+```{r plot2}
+png("plot2.png",width =480, height = 480,units = "px")
+plot2<-function(){plot(consump$date_time,consump$Global_active_power,type="l",xlab ="",ylab = "Global Active Power (kilowatts" )}
+plot2()
+
+dev.off()
+
+```
+
+## Plot 3
+
+```{r plot3}
+png("plot3.png",width =480, height = 480,units = "px")
+plot3<-function(){
+        plot(consump$date_time,consump$Sub_metering_1,
+             type = "l",
+             col="black",
+             xlab="",
+             ylab="Energy sub metering")
+        lines(consump$date_time,consump$Sub_metering_2,col="red")
+        lines(consump$date_time,consump$Sub_metering_3,col="blue")
+                legend("topright",
+       legend = c("Sub_metering_1","Sub_metering_2","Sub_metering_3"),
+       col=c("black","red","blue"),
+       lty = 1
+        )
+}
+plot3
+dev.off()
+```
+
+## Plot 4
+```{r plot4}
+png("plot4.png",width =480, height = 480,units = "px")
+
+plot5<-function(){
+        plot(consump$date_time,consump$Voltage,type = "l",
+        xlab="datetime",
+        ylab="Voltage")
+                }
+
+plot6<-function(){
+        plot(consump$date_time,consump$Global_reactive_power,
+             type="l",
+             xlab="datetime",
+             ylab="Global_reactive_power"
+             )
+}
+
+par(mfrow=c(2,2))
+plot2()
+plot5()
+plot3()
+plot6()
+
+dev.off()
+```
+

@@ -1,0 +1,35 @@
+---
+title: "README.Rmd"
+output: 
+        html_document:
+                toc: true
+                toc_float: true
+                number_sections: true
+                theme: darkly
+---
+# About
+
+This folder stores all files related to getting and cleaning data, Data Science Specialization on Coursera [course link](https://www.coursera.org/learn/exploratory-data-analysis/home/welcome)
+
+This README.rmd file also serves as a template for R notebook files. Copy and paste the metadata for fast setup
+
+# Organization
+
+Below is the list of assignments and naming strategy
+
+* Week 1 quiz: w1qz
+* Course Project 1: proj1
+* Week 2 quiz: w2qz
+* Course project 2: proj2
+
+# Project submission
+
+* Create a subfolder in the public repo for submission. Do not change the files in the pub repo. Instead, pub repo is merely where to copy prepared files to. 
+
+
+# CHEATSHEET 
+        *Ctrl+Shift+Enter* run within the chunk
+        *Ctrl+Alt+I* insert chunk
+        *Ctrl+Shift+K*  previiew HTML
+        
+
