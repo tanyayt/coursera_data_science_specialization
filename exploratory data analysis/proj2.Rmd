@@ -1,0 +1,16 @@
+---
+title: "proj2.Rmd"
+output: 
+        html_document:
+                toc: true
+                toc_float: true
+                number_sections: true
+                theme: darkly
+---
+# About {-}
+
+This document includes all the notes, codes, and thought processes for week 4 project 2
+
+## Submission Notes
+
+repo link:
