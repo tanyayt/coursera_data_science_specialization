@@ -84,7 +84,7 @@ dev.off()
 Of the four types of sources indicated by the type (point, nonpoint, onroad, nonroad) variable, which of these four sources have seen decreases in emissions from 1999–2008 for Baltimore City? Which have seen increases in emissions from 1999–2008? Use the ggplot2 plotting system to make a plot answer this question.
 
 ```{r q3}
-
+library(ggplot2)
 NEI_bal_by_source<-NEI%>% filter(fips=="24510")%>% group_by(year,type)%>% 
         summarise(sum_emission=sum(Emissions))
 head(NEI_bal_by_source)
@@ -99,11 +99,18 @@ Ans: the type Point has increased until 2006 and then decreased om 2008
 
 Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?
 
-```{r q4}
+```{r finding-coal-comb-related-source}
+SCC_coal<-SCC[grepl("coal",SCC$EI.Sector,ignore.case = TRUE),]
+SCC_coal_comb<-SCC_coal[grepl("comb",SCC_coal$EI.Sector,ignore.case=TRUE),]
+```
+```{r q4_plot}
 png("proj2_q4.png")
-NEI_combus_coal<-NEI%>% filter(SCC=="10100101")%>% group_by(year)%>%
-        summarise(sum_emi=sum(Emissions))
-qplot(year,sum_emi,data=NEI_combus_coal)
+
+NEI_combus_coal<-merge(NEI,SCC_coal_comb,by="SCC")
+
+NEI_combus_coal_year<-NEI_combus_coal%>% group_by(year)%>%
+           summarise(sum_emi=sum(Emissions))
+qplot(year,sum_emi,data=NEI_combus_coal_year,main="Coal-Combustion Related Emission by Year")
 dev.off()
 ```
 
@@ -113,8 +120,29 @@ ans: the emission has dropped
 
 How have emissions from motor vehicle sources changed from 1999–2008 in Baltimore City?
 
+```{r q5,cache=TRUE}
+png("proj2_q5.png")
+SCC_motor<-SCC[grep("mobile",SCC$EI.Sector,ignore.case = TRUE),]
+NEI_motor<-merge(NEI,SCC_motor,by="SCC")
+NEI_motor_bal<-NEI_motor%>%filter(fips=="24510")%>%group_by(year)%>%
+        summarise(sum_emi=sum(Emissions))
+qplot(year,sum_emi,data = NEI_motor_bal,main = "Motor Vehicle Emission in Baltimore by Year")
+dev.off()
+
+```
+
 
 # Question 6 
 
+Compare emissions from motor vehicle sources in Baltimore City with emissions from motor vehicle sources in Los Angeles County, California (fips == "06037"). Which city has seen greater changes over time in motor vehicle emissions?
 
+```{r q6_compare_LA_Bal}
+png("proj2_q6.png",width = 700)
+NEI_motor_bal_la<-NEI_motor%>% filter(fips %in% c("06037","24510"))%>%
+        mutate(city=ifelse(fips=="06037","Los Angeles County","Baltimore City"))%>%
+        group_by(city,year)%>% summarise(sum_emi=sum(Emissions))
+
+ggplot(NEI_motor_bal_la,aes(x=year,y=sum_emi))+geom_line(aes(color=city))+ggtitle("Comparing Motor Vehicle Emission of Los Angeles County and Baltimore City")
+dev.off()
+```
 
