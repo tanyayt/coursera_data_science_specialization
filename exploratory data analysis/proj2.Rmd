@@ -13,4 +13,108 @@ This document includes all the notes, codes, and thought processes for week 4 pr
 
 ## Submission Notes
 
-repo link:
+Upload pictures and copy and paste R codes
+
+# Download File
+```{r downloadfile}
+# uncomment if the file hasn't been downloaded
+# library(downloader)
+# download.file("https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip",destfile = "proj2.zip")
+# unzip("proj2.zip")
+```
+
+
+
+The data files are: 
+        - Source_Classification_Code.rds
+        - summarySCC_PM25.rds
+
+# Question 1 
+
+Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? Using the base plotting system, make a plot showing the total PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.
+
+## Read Data in NEI and SCC
+```{r read_data}
+NEI <- readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
+```
+
+## Total Emission vs. Year
+```{r total_emission_by_year}
+library(dplyr)
+NEI_yearsum<-NEI %>% group_by(as.factor(year))%>% summarise(emi_sum=sum(Emissions))
+colnames(NEI_yearsum)<-c("year","total_emission")
+NEI_yearsum$year<-as.numeric(as.character(NEI_yearsum$year))
+NEI_yearsum
+```
+
+## Plot NEI_yearsum
+```{r NEI_yearsum}
+png("proj2_q1.png",width =480, height = 480,units = "px")
+plot(NEI_yearsum$year,NEI_yearsum$total_emission,type = "l",main = "Q1 Total Emission by Year in US",xlab = "Year",ylab = "Total PM2.5 Emission in Tons")
+dev.off()
+```
+
+
+
+Ans: Yes, the total PM2.5 emission from all sources decreased from 1999 to 2008 
+
+# Question 2
+
+Have total emissions from PM2.5 decreased in the Baltimore City, Maryland (fips == "24510") from 1999 to 2008? Use the base plotting system to make a plot answering this question.
+
+```{r select_bal_data}
+NEI_bal<-NEI%>% dplyr::filter(fips=="24510")%>% group_by(year)%>%
+        summarize(bal_year_sum=sum(Emissions))
+head(NEI_bal)
+
+```
+
+```{r plot_bal_data}
+png("proj2_q2.png",width =480, height = 480,units = "px")
+plot(NEI_bal$year,NEI_bal$bal_year_sum,type = "l",main = "Q2.Total PM2.5 Emission in Baltimore, Maryland",xlab = "Year",ylab = "Total PM2.5 Emission in Tons")
+dev.off()
+
+```
+
+
+
+# Question 3 
+
+Of the four types of sources indicated by the type (point, nonpoint, onroad, nonroad) variable, which of these four sources have seen decreases in emissions from 1999–2008 for Baltimore City? Which have seen increases in emissions from 1999–2008? Use the ggplot2 plotting system to make a plot answer this question.
+
+```{r q3}
+
+NEI_bal_by_source<-NEI%>% filter(fips=="24510")%>% group_by(year,type)%>% 
+        summarise(sum_emission=sum(Emissions))
+head(NEI_bal_by_source)
+png("proj2_q3.png")
+qplot(year,sum_emission,facets = .~type,data = NEI_bal_by_source)
+dev.off()
+```
+
+Ans: the type Point has increased until 2006 and then decreased om 2008
+
+# Question 4 
+
+Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?
+
+```{r q4}
+png("proj2_q4.png")
+NEI_combus_coal<-NEI%>% filter(SCC=="10100101")%>% group_by(year)%>%
+        summarise(sum_emi=sum(Emissions))
+qplot(year,sum_emi,data=NEI_combus_coal)
+dev.off()
+```
+
+ans: the emission has dropped
+
+# Question 5 
+
+How have emissions from motor vehicle sources changed from 1999–2008 in Baltimore City?
+
+
+# Question 6 
+
+
+
