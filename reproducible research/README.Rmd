@@ -1,0 +1,9 @@
+## About 
+
+This folder contains all the files used for Coursera Course: 
+
+        *Reproducible research
+        
+Except for Project 1, that is stored in:
+
+[link](https://github.com/tanyayt/RepData_PeerAssessment1)
