@@ -1,0 +1,218 @@
+---
+title: "Storm Data Analysis - Project 2 [placeholder-need to summarize data analysis]"
+output: 
+        html_document:
+                toc: true
+                toc_float: true
+                number_sections: false
+                theme: darkly
+---
+# About
+
+This document outlines the analysis and results of Project 2 - Reproducible Research
+
+# Introduction
+
+This project involves exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
+
+
+## Data Source
+
+The data source can be downloaded from: 
+[Storm Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+
+## Packages Required
+
+```{r packages}
+library(downloader)
+library(dplyr)
+
+```
+
+# Data Processing
+
+describes how data is loaded and processed
+
+## Download Data (Chante Eval to FALSE if the data has been downloaded)
+```{r download,eval=FALSE}
+url<-"https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+download(url,destfile="storm.csv")
+```
+
+## Examine Sample Data
+```{r examine sample data}
+test<-read.csv("storm.csv",sep = ",",nrows = 100,header = TRUE)
+str(test)
+```
+
+## Read Selected Columns
+```{r read_selected_columns,cache=TRUE}
+
+storm_data<-read.csv("storm.csv",colClasses =  c(rep("NULL",7),"character",rep("NULL",14),"numeric","numeric","numeric","character","numeric","character",rep("NULL",8),"numeric"),header = TRUE,na.strings = "")
+str(storm_data)
+        
+
+```
+```{r}
+storm_data_backup<-storm_data
+```
+
+
+## Compute Total Crop and Property Damage
+```{r}
+table(storm_data$CROPDMGEXP)
+```
+Notice the data has lower cases k,m,b and unrecognized characters. 
+```{r function_unitcov}
+#unit_conv function converts a character "K" to a numeric 1000, "M" to a numeric
+# 1,000,000; and "B" to a numeric 1,000,000,000; NA to 1
+unit_conv<-function(x){
+        if (is.na(x)){return(NA)}
+        else if (x=="K"|x=="k"){return(1000)}
+        else if (x=="M"|x=="m"){return(1000000)}
+        else if (x=="B"|x=="b"){return(1000000000)}
+        else {
+              return (NA)
+        }
+        
+}
+# note unit_cov is not vectorized so mapply is needed to apply to the column
+unit_conv(NA)
+unit_conv("b")
+unit_conv("m")
+unit_conv("k")
+unit_conv("no code")
+
+```
+
+variable CROPDMG2 is the actual dollar amount of crop damage
+```{r covert_cropdmg,cache=TRUE}
+
+storm_data$CROPDMGEXP<-mapply(
+        unit_conv,storm_data$CROPDMGEXP
+)
+storm_data<-storm_data%>%dplyr::mutate(CROPDMG2=CROPDMG*CROPDMGEXP)
+```
+
+variable PROPDMG2 stores actual dollar amount of property damage
+
+```{r covert_PROPDMG,cache=TRUE}
+storm_data$PROPDMGEXP<-mapply(unit_conv,storm_data$PROPDMGEXP)
+storm_data<-storm_data%>%dplyr::mutate(PROPDMG2=PROPDMG*PROPDMGEXP)
+```
+
+simplify the dataset by selecting only the variables needed
+```{r simplify}
+storm_data<-dplyr::select(storm_data,-c("CROPDMG","CROPDMGEXP","PROPDMG","PROPDMGEXP"))
+```
+
+
+
+
+
+## Clean Event Type
+The event type is in various formats... 
+```{r}
+table(storm_data$EVTYPE)
+```
+
+
+
+```{r}
+event_types<-storm_data%>%group_by(tolower(EVTYPE))%>%summarise(n=n())%>%filter(n>=1000)
+event_types
+
+```
+
+Next, we will first convert all event types to lower case, and then: 
+        
+        * transform "high winds" to "high wind"
+        * transfomr "marine tstm wind" to "marine thunderstorm wind"
+        * transform "thunderstorm winds","tstm wind" to "thunderstorm wind"
+        * transform "wild/forest fire" to "wildfire"
+        * transform "winter weather/mix" to "winter weather
+
+In addition, we transform any alternative forms to the top 10 event types
+        
+        * transform "hail*" to "hail"
+        * transform "tornado*" to "tornado"
+        * transform "flash flood*" to "flash flood"
+        * transform "flood*" to "flood"
+        * transform "lightning*" to "lightning"
+        
+        
+```{r clean_text_event_type}
+storm_data$EVTYPE<-tolower(storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("high wind*","high wind",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("marine tstm wind*","marine thunderstorm wind",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("thunderstorm wind*|tstm wind*","thunderstorm wind",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("wild/forest fire*","wildfire",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("winter weather/mix*","winter weather",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("hail*","hail",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("tornado*","tornado",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("flash flood*","flash flood",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("flood*","flood",storm_data$EVTYPE)
+storm_data$EVTYPE<-gsub("lightning*","lightning",storm_data$EVTYPE)
+
+```
+
+## Rationale for Data Transformation (No Code)
+
+### Select Relevant Variables 
+
+This study focuses on two key questions: 
+
+        *Which types of events are most harmful to population health?
+        *Which types of events have the greatest economic consequences?
+
+This suggests the key information needed and its corresponding variables [reference](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
+
+        *Event Type: EVTYPE
+        *Harmful to Population health:
+                -FATALITIES
+                -INJURIES
+                
+        *Economic consequence
+                -PROPDMG: property damate measured in dollar ammount
+                -PROPDMGEXE: K for thousands, M for millions, B for billions
+                -CROPDMG: crop damage damage measured in dollar amount
+                -CROPDMGEXP: crop damage unit, coded as K, M, B same as PROPDMGEXE
+        *Index
+                -REFNUM: reference number
+
+### Compute Total Crop and Property Damage
+
+Since the crop damage is measured by a numeric variable and the associated unit (thousands/millions/billions), it is necessary to create two new variables: 
+
+        *CROPDMG: transformed to the actual dollar amount of crop damage. For example 1K will be 1000, 2M will be 2,000,000
+        *PROPDMG: transformed to the actual dollar amount of property damage. For example 1K will be 1000, 2M will be 2,000,000
+
+The original variables ain't necessary and can be removed from the dataset. 
+
+### Clean Event Type
+
+It is impractical to clean every single case so we set a rule here, if a particular type of spelling error appears 1000 times or more, we construct a strategy to fix it in the data set. In the meantime, we are looking for events with the most impact. Therefore, the threshhold is reasonable, compared to about 1 million samples. 
+
+In addition, I also cleaned the incorrect cases (by making all characters lower cases), and various forms (e.g. flooding to flood) for the top 10 event types. 
+
+
+# Data Analysis
+
+## Synopsis
+
+need to be less than 10 sentences
+
+## Detailed Steps
+
+Need to contain 1-3 plots with descriptive captions
+
+### Which types of events are most harmful to population health? 
+
+## Total Fatalities of Each Event Type
+
+
+### Which types of events have the greatest economic consequences? 
+
+
+
+
