@@ -1,0 +1,9 @@
+## About 
+
+This folder contains all the files used for Coursera Course: 
+
+        *Statistical Analysis
+        
+## File Names
+
+        *qz1_XXXXX: for all quiz 1 related files
