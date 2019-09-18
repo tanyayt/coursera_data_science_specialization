@@ -1,5 +1,5 @@
 ---
-title: "Storm Data Analysis - Project 2 [placeholder-need to summarize data analysis]"
+title: "Storm Data Analysis - Project 2"
 output: 
         html_document:
                 toc: true
@@ -26,6 +26,7 @@ The data source can be downloaded from:
 ```{r packages}
 library(downloader)
 library(dplyr)
+library(ggplot2)
 
 ```
 
@@ -111,16 +112,9 @@ storm_data<-dplyr::select(storm_data,-c("CROPDMG","CROPDMGEXP","PROPDMG","PROPDM
 
 
 ## Clean Event Type
-The event type is in various formats... 
-```{r}
-table(storm_data$EVTYPE)
-```
-
-
-
 ```{r}
 event_types<-storm_data%>%group_by(tolower(EVTYPE))%>%summarise(n=n())%>%filter(n>=1000)
-event_types
+head(event_types,30)
 
 ```
 
@@ -200,19 +194,82 @@ In addition, I also cleaned the incorrect cases (by making all characters lower 
 
 ## Synopsis
 
-need to be less than 10 sentences
+The data analysis includes the following steps: 
+
+        * Examine the processed data
+        * Calculate the total fatalities, injuries, property damage, and crop damage by event type 
+        * Plot the top 5 most fatal event types
+        * Plot the top 5 event types causing most injuries 
+        * Plot the top 5 event types causing most crop damage in dollar values
+        * Plot the top 5 event types causing most property damages 
 
 ## Detailed Steps
 
-Need to contain 1-3 plots with descriptive captions
+## Final Examination of Processed Data 
+```{r examine}
+head(storm_data)
+
+```
+
+```{r group_by_event_type}
+storm_data_by_EVTYPE<-storm_data%>%
+        group_by(EVTYPE)%>%
+        summarise(fatal_sum=sum(FATALITIES),
+                  injur_sum=sum(INJURIES),
+                  propdmg_sum=sum(PROPDMG2),
+                  cropdmg_sum=sum(CROPDMG2))
+head(storm_data_by_EVTYPE)
+
+```
 
 ### Which types of events are most harmful to population health? 
 
-## Total Fatalities of Each Event Type
+### Fatalities
 
+The top 5 storm types causing most fatalities are shown below 
+
+```{r fatalities}
+top_5fatal<-arrange(top_n(storm_data_by_EVTYPE,5,fatal_sum),desc(fatal_sum))
+```
+```{r fat_plot}
+ggplot2::ggplot(data=top_5fatal,aes(x=reorder(EVTYPE,fatal_sum),y=fatal_sum))+geom_bar(stat = "identity",fill="dark red")+coord_flip()+ylab("Total Fatalities")+xlab("Storm Event Type")+ggtitle("Top 5 Storm Types Causing Most Fatalities")
+```
+
+### Injuries
+
+The top 5 storm types causing most injuries are shown below: 
+
+```{r}
+top_5inj<-arrange(top_n(storm_data_by_EVTYPE,5,injur_sum),desc(injur_sum))
+
+ggplot(data=top_5inj,aes(x=reorder(EVTYPE,injur_sum),y=injur_sum))+geom_bar(stat = "identity",fill="dark orange")+coord_flip()+ylab("Total Injuries")+xlab("Storm Event Type")+ggtitle("Top 5 Storm Types Causing Most Injuries")
+```
 
 ### Which types of events have the greatest economic consequences? 
 
+The top 5 event types causing most crop damage are shown below: 
 
+### Crop Damages 
+
+```{r}
+top_5cropdmg<-arrange(top_n(storm_data_by_EVTYPE,5,cropdmg_sum),desc(cropdmg_sum))
+
+ggplot(data=top_5cropdmg,aes(x=reorder(EVTYPE,cropdmg_sum),y=cropdmg_sum))+
+        geom_bar(stat = "identity",fill="dark green")+coord_flip()+ylab("Total Crop Damage ($)")+xlab("Storm Event Type")+ggtitle("Top 5 Storm Types Causing Most Crop Damage")
+```
+
+
+### Total Property Damage
+
+The top 5 storm events causing the most property damage are shown below
+
+```{r}
+top_5propdmg<-arrange(top_n(storm_data_by_EVTYPE,5,propdmg_sum),desc(propdmg_sum))
+
+
+
+ggplot(data=top_5propdmg,aes(x=reorder(EVTYPE,propdmg_sum),y=propdmg_sum))+
+        geom_bar(stat = "identity",fill="dark blue")+coord_flip()+ylab("Total Property Damage ($)")+xlab("Storm Event Type")+ggtitle("Top 5 Storm Types Causing Most Property Damage")
+```
 
 
