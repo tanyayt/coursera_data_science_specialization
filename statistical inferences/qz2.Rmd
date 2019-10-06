@@ -1,0 +1,58 @@
+,--
+title: "qz2.Rmd"
+output: 
+        html_document:
+                toc: true
+                toc_float: true
+                number_sections: false
+                theme: darkly
+---
+# About 
+
+This file documents the work process to complete Quiz 2 in Statistical Inferences on Coursera 
+
+#Q1 
+skip
+#Q2 
+```{r}
+round(pnorm(70,mean = 80,sd = 10,lower.tail = TRUE)*100)
+```
+
+#Q3 
+```{r}
+round(qnorm(0.975,mean = 1100,sd = 75,lower.tail = TRUE))
+```
+
+#Q4
+```{r}
+round(qnorm(0.975,mean=1100,sd=7.5,lower.tail = TRUE))
+```
+
+#Q5
+```{r}
+pbinom(3,5,prob = 0.5,lower.tail = FALSE)
+```
+
+#Q6
+```{r}
+#using t distribution
+mu<-15
+s<-10
+n<-100
+x<-14
+t<-(x-mu)/(s/sqrt(n))
+1-2*pt(-abs(t),n-1)
+
+
+```
+
+#Q7
+0.5 
+
+#Q8
+```{r}
+lam<-5
+n<-3
+ppois(10,5*3,lower.tail = TRUE)
+```
+
