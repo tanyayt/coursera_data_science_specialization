@@ -1,0 +1,164 @@
+---
+title: "Simulation Report"
+author: "Tanya T"
+date: "10/10/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+# Overview
+
+This report is divided in part 1 and part 2. 
+
+Central Limit Theorem (CLT) states that the sampling distribution of t he sample means approaches a normal distribution as the sample size gets larger. The goal of part 1 is to compare the simulated exponential distribution in R with the theoretical distribution. With a large number 1000, we are going to prove the the simulated sample produces a similar distribution with the theoretical distribution 
+
+In part 2, we examined the ToothGrowth data, and compared the means of the two supplment delivery types (ascorbic acid, coded as VC and orange juice, coded as OJ); as well as the tooth growths among three difference doses (0.5,1 and 2 mg/day). We conclude that, there is no difference in toothgrowth between two delivery methods, by orange juice or ascorbic acid. However, the higher the dose is, the more tooth growth is seen. 
+
+## Load Libraries
+```{r}
+library(ggplot2)
+
+```
+
+
+# Part 1 Simulation
+
+Here we invesitgatethe exponential distribution in R and compare it with the Central Limit Theorem (CLT. 
+
+## More on Exponential Distribution
+
+The exponential distribution is concerned with the amount of time until a specific event occurs. e.g. the amount of time until the next rain storm likely has an exponential distribution. R's exp function takes two arguments: 
+
+        * The number of observations you want to see 
+        * The estimated rate of events for the distribution: this is usually 1/expected service life or wait time
+
+## Simulation
+
+First, we set the initial values for lambda, sample size, and number of simulations
+
+```{r setup}
+set.seed(1) # set seed for reprocibability
+lambda<-0.2
+nsample<-40
+simn<-1000 # number of simulations
+```
+The simualted data is a 40 by 1000 matrix. 
+
+```{r simdata}
+simdata<-replicate(simn,rexp(nsample,lambda)) #create simdata matrix 
+str(simdata)
+```
+
+## Sample Mean versus Theoretical Mean 
+
+Next, the sample mean is calculated
+```{r}
+#sim_mean is the mean of simulated data
+sim_mean<-colMeans(simdata) #calculate column means, each column is 40 samples 
+str(sim_mean)
+
+#The theoretical mean and standard deviation are calculated 
+#theoretical mean and SD
+theo_mean<-1/lambda
+theo_sd<-theo_mean/sqrt(nsample)
+theo_var<-theo_sd^2
+```
+The mean of simulation is `r mean(sim_mean)` whereas the theoretical mean is `r theo_mean`, as shown in the graph below
+
+```{r compmean}
+sim_mean<-as.data.frame(sim_mean)
+colnames(sim_mean)<-"value"
+ggplot(data = sim_mean,aes(x=value))+geom_histogram(binwidth = 0.2)+
+        geom_vline(xintercept = theo_mean,colour=c("red"),linetype="dashed")+labs(title="Comapring Sample Mean Distributions and the Theoretical Mean",x="Mean Values",y="Frequency")
+
+```
+
+
+## Sample Variance versus Theoretical Variance
+```{r}
+sim_var<-sd(as.matrix(sim_mean))^2
+sim_var
+```
+
+The theoretical variance is `r theo_var` whereas the sample variance is `r sim_var`
+
+
+## Distribution
+
+Next we will show the distribution is approximately normal by overlaying a normal distribution with the theoretical mean and standard deviation
+```{r}
+#note here we need density function for geom_histogram
+
+ggplot(data = sim_mean,aes(x=value))+
+        geom_histogram(aes(y=..density..),binwidth = 0.2)+ 
+        stat_function(fun=dnorm,args=list(mean=theo_mean,sd=theo_sd),color="green",
+                      lwd=3,linetype="dashed")+labs(title = "Comparing the Sample Distribution with the Normal Density Curve",xlab="Mean Values")
+
+
+```
+
+Based on the plot above that we know the distribution is approximately normal
+
+# Part 2 Basic Inferential Data Analysis
+
+## Load ToothGrowth Data
+```{r}
+data("ToothGrowth")
+str(ToothGrowth)
+```
+
+We examined the ToothGrowth data and found it contains three variables, len, supp and dos. 
+        *len: the numeric tooth length 
+        *supp: supplement type (VC or OJ)
+        *dose: numeric dose in milligrams/day 
+
+
+Next we visualize the data 
+```{r}
+ggplot(data = ToothGrowth,aes(x=supp,y=len))+
+        geom_boxplot()+labs(title = "Tooth Lengths by Delivery Method of Vitamin C",
+                            x="Delivery Method",y="Tooth Length")
+```
+
+
+```{r}
+ggplot(data = ToothGrowth,aes(x=dose,y=len,color=supp))+
+        geom_boxplot()+labs(title = "Tooth length by Vitamin Doses",x="Dose (mg/day)",
+                            y="Tooth Lengh")
+```
+
+## Compare tooth growth by supp
+```{r}
+t.test(len~supp,data = ToothGrowth)
+```
+since the p value is greater than 0.05, there is no statistically significant difference on toothgrowth by supplement types
+
+## Compare tooth growth by dose 
+```{r}
+ToothGrowth$dose<-as.character(ToothGrowth$dose)
+res<-aov(len~dose,data = ToothGrowth)
+summary(res)
+```
+A one-way ANOVA test was performed to examine the differences of tooth lenghs by dose groups. The p value indicates that there is a statistically detectable difference. 
+
+In addition, Tukey pairwise comparisons are conducted to examine the differences between each pair of groups 
+
+```{r}
+TukeyHSD(res)
+```
+From the results, we've learned that the differences are all significant. 
+
+## Conclusion
+
+        * The assumptions for conducting these two-sample t-tests are that the groups are all independent of each other. 
+        *Although the mean of OJ group(`r mean(ToothGrowth$len[ToothGrowth$supp=="OJ"])`) is greater than the mean tooth length of VC group (`r mean(ToothGrowth$len[ToothGrowth$supp=="VC"])`), such difference is not statistically significant; However, the 
+        *There are, however, statistically detectable differences among the groups with different doses. Thet mean values and confidence intervals for each dose group are: 
+                - Dose=0.5 `r mean(ToothGrowth$len[ToothGrowth$dose=="0.5"])` with the confidence interval `r t.test(ToothGrowth$len[ToothGrowth$dose=="0.5"])$conf.int`
+               
+                - Dose=1 `r mean(ToothGrowth$len[ToothGrowth$dose=="1"])` with the confidence interval `r t.test(ToothGrowth$len[ToothGrowth$dose=="1"])$conf.int`
+                - Dose=2 `r mean(ToothGrowth$len[ToothGrowth$dose=="2"])` with the confidence interval `r t.test(ToothGrowth$len[ToothGrowth$dose=="2"])$conf.int`
+
+The higher the dose is, the more tooth growth there is. 
+
+
+
