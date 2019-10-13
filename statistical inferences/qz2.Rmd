@@ -1,4 +1,4 @@
-,--
+---
 title: "qz2.Rmd"
 output: 
         html_document:

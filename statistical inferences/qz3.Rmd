@@ -1,0 +1,68 @@
+---
+title: "qz3.Rmd"
+output: 
+        html_document:
+                toc: true
+                toc_float: true
+                number_sections: false
+                theme: darkly
+---
+# About
+
+This file documents the process of completing Quiz 3 in Statistical Inferences of Coursera Course 
+
+# Q1 
+
+note: there are two tails of in t distribution; therefore, the 95% confidence level implies 0.975 percentile of the t distribution at the upper tail
+
+```{r}
+N<-9
+MEAN<-1100
+SD<-30
+MEAN+c(-1,1)*qt(0.975,8)*30/3
+```
+
+# Q2 
+```{r}
+mn<-2
+2*3/qt(0.975,8,lower.tail = TRUE)
+```
+
+# Q3 
+```{r}
+# paired test 
+
+
+```
+#Q4 
+```{r}
+n1<-n2<-10
+mu1<-3
+var1<-0.6
+mu2<-5
+var2<-0.68
+
+pooledvar<-(var1*(n1-1)+var2*(n2-1))/(n1+n2-2)
+pooleds<-sqrt(pooledvar)
+
+mu1-mu2+c(-1,1)*qt(0.975,n1+n2-2)*pooleds/sqrt(n1+n2-2)
+```
+
+#Q7
+```{r}
+n<-9
+m1<-(0-3) #treatment 
+m2<-1 #placebo
+s1<-1.5
+s2<-1.8
+
+sp<-sqrt((s1^2*(n-1)+s2^2*(n-1))/(n+n-2))
+# for two sample unpaired t test 
+
+m1-m2+c(-1,1)*qt(0.95,n+n-2)*sp*sqrt(1/n+1/n)
+
+
+```
+
+
+
