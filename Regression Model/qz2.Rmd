@@ -1,0 +1,89 @@
+---
+title: "qz2.Rmd"
+output: 
+        html_document:
+                toc: true
+                toc_float: true
+                number_sections: false
+                theme: darkly
+---
+# Q1
+
+```{r}
+x <- c(0.61, 0.93, 0.83, 0.35, 0.54, 0.16, 0.91, 0.62, 0.62)
+y <- c(0.67, 0.84, 0.6, 0.18, 0.85, 0.47, 1.1, 0.65, 0.36)
+summary(lm(y~x))$coefficient[2,4]
+```
+
+note by default, lm returns the two-sided p values; the [2,4] index returns the second coefficient, beta1, and the fourth column value (which is p)
+
+#Q2
+the question asks for residul vairation
+```{r}
+fit<-lm(y~x)
+summary(fit)$sigma
+```
+
+alternatively, it is also 
+```{r}
+sqrt((sum(resid(fit)^2)/(length(x)-2)))
+```
+
+#Q3 
+
+```{r}
+library(datasets)
+data("mtcars")
+y<-mtcars$mpg
+x<-mtcars$wt
+fit<-lm(y~x)
+meanx<-mean(x)
+predict(fit,newdata = data.frame(x=mean(x)),interval = "confidence")
+```
+
+#Q4 
+```{r}
+?mtcars
+#weight is per 1000lb 
+#ans the estimated expected change in mpg per 1k lb increase in weight 
+```
+
+
+#Q5
+```{r}
+predict(fit,newdata=data.frame(x=3),interval="prediction") #note this should be prediction interval 
+```
+ans: 27.57
+
+#Q6 
+
+```{r}
+sumcoef<-summary(fit)$coefficients
+(sumcoef[2,1]+c(-1,1)*qt(0.975,df=fit$df)*sumcoef[2,2])*2
+```
+
+
+#Q7 
+
+it will be divided by 100 
+
+
+#Q8
+ans: the new intercept would be beta_zero_hat - beta1_hat*c
+
+#Q9
+
+the question asks about the residual variations of two models 
+residual variation (the sum of squarefit/n-2) can be obtained by $sigma
+```{r}
+fit1<-lm(y~x)
+fit2<-lm(y~1) # which force the slope to be zero 
+
+summary(fit1)$sigma/summary(fit2)$sigma
+
+```
+
+
+#Q10 
+
+the residuals must always sum to zero 

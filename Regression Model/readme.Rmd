@@ -1,0 +1,13 @@
+---
+title: "readme"
+output: html_document
+---
+## About 
+
+This folder contains all the files used for Coursera Course: 
+
+        *Regression Model
+        
+## File Names
+
+        *qz1_XXXXX: for all quiz 1 related files
