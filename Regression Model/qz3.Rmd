@@ -1,0 +1,69 @@
+---
+        title: "Quiz 3"
+output:
+        html_document:
+        toc: true
+toc_float: true
+number_sections: false
+theme: darkly
+---
+
+#Q1
+
+```{r}
+data("mtcars")
+mcyl<-relevel(factor(mtcars$cyl),"4")
+fit<-lm(mpg~mcyl+wt,data = mtcars)
+summary(fit)$coef[3,1]
+
+```
+
+#Q2
+```{r}
+fit_no_wt<-lm(mpg~mcyl,data=mtcars)
+summary(fit)$coef
+summary(fit_no_wt)$coef
+```
+
+ans: holding weight constant, cylinder appears to have less impact on mpg
+
+#Q3 
+
+```{r}
+fit_inter<-lm(mpg~mcyl+wt+mcyl*wt,data=mtcars)
+anova(fit,fit_inter)
+```
+
+the p value is greater than  0.05 suggesting the interaciton term is not necessary
+
+#Q4 
+
+
+#Q5 
+
+
+```{r}
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+fit<-lm(y~x)
+cooks.distance(fit)
+# the fifth point is the most influential 
+hatvalues(fit)[5]
+```
+
+#Q6 
+
+```{r}
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+fit<-lm(y~x)
+hatvalues(fit)
+dfbetas(fit)[5,2]
+
+```
+
+
+#Q7
+
+ans: it is possible for the coefficient to reverse sign after adjustment
+
