@@ -1,0 +1,86 @@
+---
+        title: "Quiz 4"
+output:
+        html_document:
+        toc: true
+toc_float: true
+number_sections: false
+theme: darkly
+---
+# Q1 
+
+Consider the space shuttle data shuttle in the MASS library. Consider modeling the use of the autolander as the outcome (variable name use). Fit a logistic regression model with autolander (variable auto) use (labeled as "auto" 1) versus not (0) as predicted by wind sign (variable wind). Give the estimated odds ratio for autolander use comparing head winds, labeled as "head" in the variable headwind (numerator) to tail winds (denominator).
+
+```{r}
+library(MASS)
+library(dplyr)
+data(shuttle)
+# obtain dataset, and relevel to noauto
+shuttle <- mutate(shuttle, use = relevel(use, ref="noauto"))
+
+# create a use.bin to shuttle use minus 1 
+shuttle$use.bin <- as.integer(shuttle$use) - 1
+
+# logistic regression without intercept 
+mdl <- glm(use.bin ~ wind - 1, family = "binomial", data = shuttle)
+summary(mdl)
+```
+
+estimated odds ratio for autolander use comparing head winds, labeled as "head" in the variable headwind (numerator) to tail winds (denominator).
+
+```{r}
+exp(coef(mdl)[[1]])/exp(coef(mdl)[[2]])
+```
+
+# Q2 
+
+Consider the previous problem. Give the estimated odds ratio for autolander use comparing head winds (numerator) to tail winds (denominator) adjusting for wind strength from the variable magn.
+
+```{r}
+mdl2 <- glm(use.bin ~ wind + magn - 1, family = "binomial", data = shuttle)
+summary(mdl2)
+
+
+
+```
+
+
+```{r}
+exp(coef(mdl2))
+```
+
+```{r}
+exp(coef(mdl2))[[1]]/exp(coef(mdl2))[[2]]
+
+```
+
+# Q3 
+
+```{r}
+mdl3 <- glm(I(1-use.bin) ~ wind - 1, family = "binomial", data = shuttle)
+summary(mdl3)
+
+
+```
+
+#Q4
+
+Consider the insect spray data InsectSprays. Fit a Poisson model using spray as a factor level. Report the estimated relative rate comapring spray A (numerator) to spray B (denominator).
+```{r}
+
+data("InsectSprays")
+
+mdl4 <- glm(count ~ spray -1, family = "poisson", data = InsectSprays)
+summary(mdl4)$coef
+
+```
+
+```{r}
+coefs <- exp(coef(mdl4)) # the exp (coef) is the relative rate
+coefs[[1]]/coefs[[2]]
+```
+
+
+
+
+
