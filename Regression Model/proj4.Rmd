@@ -1,129 +1,95 @@
 ---
-        title: "Project 4 Automatic/Manual Transmissions "
-output:
-        html_document:
-        toc: true
-toc_float: true
-number_sections: false
-theme: darkly
+title: "Regression Model Project: Transmission Type and MPG"
+output: pdf_document
 ---
-# Executive Summary
-
-In this report we will investigate how miles per gallon (MGP) varies by the transmission type and other variables in mtcars data set. The following research questions will be answered using linear regression models: 
-
-        - Is an automatic or manual transmission better for MPG? 
-        - What's the MPG difference between automatic and manual transmissions? 
-        
-A linear model is built to predict mpg using the transmission type, number of cylinders, gross horsepower, and weight. It is found that, although there is a significant mpg difference between the automatic transmission (mean mpg=`r mean(mtcars$mpg[mtcars$am == 0])`) and manual cars (mean mpg=`r mean(mtcars$mpg[mtcars$am == 1])`), the transmission type only contributes about 1.81 mpg difference (p=0.20) while number of cylinders, gross horsepower and weight are significant predictors. 
-
-# Data Preparation
-
-```{r}
-data("mtcars")
-head(mtcars)
-dim(mtcars)
+```{r echo=FALSE,include=FALSE}
+library(ggplot2)
+library(ggthemes)
+library(PerformanceAnalytics)
 ```
 
-The dataset only contaisn 32 observations - a relatively small sample size therefore the conclusion should be interpreted with causion. The key variables include: 
+## Executive Summary
+In this report we will investigate how miles per gallon (MGP) varies by the transmission type and other variables in mtcars data set. The following research questions will be answered using linear regression models: 1) Is an automatic or manual transmission better for MPG? 2) What's the MPG difference between automatic and manual transmissions? 
+A linear model is built to predict mpg using the transmission type, number of cylinders, gross horsepower, and weight. It is found that, although there is a significant mpg difference between the automatic transmission (mean mpg=`r mean(mtcars$mpg[mtcars$am == 0])`) and manual cars (mean mpg=`r mean(mtcars$mpg[mtcars$am == 1])`), the transmission type only contributes about 1.81 mpg difference (p=0.20) while number of cylinders, gross horsepower and weight are significant predictors. 
 
-        *am: 0 = automatic transmission while 1 = manual transmission
-        *mpg: miles per gallon
-        *wt: Weight
-        *cyl: number of cylinders
-        *hp: gross horsepower
-        *disp: displacement in cubic inches
-        
-```{r pre-processing}
+## Data Analysis
+```{r pre-processing,echo=FALSE}
+data("mtcars")
 mtcars$amname<-ifelse(mtcars$am==0,"automatic","manual")
 mtcars$cyl<-as.factor(mtcars$cyl)
 ```
+**t-test**
+```{r}
+t.test(mtcars$mpg[mtcars$am==0],mtcars$mpg[mtcars$am==1],
+       paired = FALSE,var.equal = FALSE)
+```
+The average mpg of automatic cars is `r mean(mtcars$mpg[mtcars$am == 0])`, lower than that of manual cars `r mean(mtcars$mpg[mtcars$am == 1])`. The independent t-test suggests that the difference is significant (p<0.05). (See [Box Plot])
 
+From the [Scatterplot] , it is obvious that 4-cylinder cars have higher MPG while 8-cylinder cars have higher MPG; also, the heavier the car is, the lower the mpg is.In addition, the [Correlation Matrix] suggests that mpg is strongly correlated with weight, horsepower, and displacement  
 
-# Exploratory Analysis
-
-## Comparing Mean MPGs of Manual/Automatic Transmission
-```{r load-library}
-library(ggplot2)
-library(ggthemes)
-library(dplyr)
+**Linear Model**
+From the summary results in [Model Selection], we can see fit4 (with am, cyl,wt and hp as predictors) is the most optimized model; note hp and disp are strongly correlated (r=0.79) so it's not surprising that adding disp doesn't improve the model. We decided to select fit4 and below is the summary of the model fit: 
+```{r}
+fit4<-lm(data = mtcars,mpg~am+cyl+wt+hp)
+summary(fit4)
 ```
 
-```{r}
+## Conclusion
+The model explains 84% of the variance. Although the difference between automatic and manual transmission cars is 1.81, when other factors (cylinder, horsepower, and weight) are controlled for, the difference is not significant (p=0.20) 
+
+## Appendix
+**Exploratory Analysis**
+The dataset only contaisn 32 observations - a relatively small sample size therefore the conclusion should be interpreted with causion. 
+
+### Boxplot
+```{r fig.height=3}
 g<-ggplot(data = mtcars,aes(amname,mpg))
-g+geom_boxplot()+ggtitle("Comparing MPG of Automatic and Manual Transmission Cars")+theme_igray()+xlab("Transmission Type")
+g+geom_boxplot()+
+        ggtitle("Comparing MPG of Automatic and Manual Transmission Cars")+
+        theme_igray()+xlab("Transmission Type")
 ```
 
-The boxplot above suggests that manual transmission has a higher MPG than automatic transmission
-
-## t-test
-```{r}
-t.test(mtcars$mpg[mtcars$am==0],mtcars$mpg[mtcars$am==1],paired = FALSE,var.equal = FALSE)
-```
-
-The average mpg of automatic cars is `r mean(mtcars$mpg[mtcars$am == 0])`, lower than that of manual cars `r mean(mtcars$mpg[mtcars$am == 1])`. The independent t-test suggests that the difference is significant (p<0.05). 
-
-
-## Do MPG vary by Weight and cyl?
-```{r}
+### Scatterplot
+```{r fig.height=3}
 g<-ggplot(mtcars,aes(wt,mpg))
-g+geom_jitter(aes(color=mtcars$cyl))+theme_igray()+geom_smooth()+ggtitle("Comparing MPG by Cylinder and Weight")+xlab("weight(1000lb)")
+g+geom_jitter(aes(color=mtcars$cyl))+theme_igray()+
+        geom_smooth()+
+        ggtitle("Comparing MPG by Cylinder and Weight")+
+        xlab("weight(1000lb)")
 
 ```
 
-From the plot above, it is obvious that 4-cylinder cars have higher MPG while 8-cylinder cars have higher MPG; also, the heavier the car is, the lower the mpg is.  
-
-## Correlation Matrix
+### Correlation Matrix
 We now examine the correlation between mpg and other variables in the dataset. 
-
 ```{r corrmatrix}
-library(PerformanceAnalytics)
 mydata<-mtcars[,c(1,3:11)]
 chart.Correlation(mydata,histogram = TRUE,pch=19)
 ```
 
 Unfortunately, disp, hp, wt,  all have a statistically significant and strong correlation (p<0.05) with mpg. Therefore, it is likely that they are confounding factors that affect mpg
 
-# Model Selection
-
-- redidual plot 
-- other diagnostics
-- reporting confidence intervals
-
-## Model 
-
-
+### Model Selection
 ```{r}
 fit1<-lm(data=mtcars,mpg~am)
 fit2<-lm(data = mtcars,mpg~am+cyl)
 fit3<-lm(data = mtcars,mpg~am+cyl+wt)
 fit4<-lm(data = mtcars,mpg~am+cyl+wt+hp)
 fit5<-lm(data = mtcars,mpg~am+cyl+wt+hp+disp)
-
 anova(fit1,fit2,fit3,fit4,fit5)
-
 ```
 
-From the summary results, we can see fit4 (with am, cyl,wt and hp as predictors) is the most optimized model; note hp and disp are strongly correlated (r=0.79) so it's not surprising that adding disp doesn't improve the model. 
-
-We decided to select fit4 and below is the summary of the model fit: 
-```{r}
-summary(fit4)
-```
-The model explains 84% of the variance. Although the difference between automatic and manual transmission cars is 1.81, when other factors (cylinder, horsepower, and weight) are controlled for, the difference is not significant (p=0.20) 
-
-
-## Residual Plot
+### Residual Plot
 ```{r}
 par(mfrow=c(2,2))
 plot(fit4)
 ```
+**Interpretations of the Plots**
 
-### Interpretations of the Plots
-
-        *The residual vs. fitted values is a scatterplot between residuals and predicted values (y hat). It should be more or less random that residual should not change systematically with the fitted value. 
-        *The normal QQ plot should give a straight line if the errors are distributed randomly. The QQplot above does form a straight line; Toyota Corella, Fiat and Chrysler Imperial deviate from the straight line though. 
-        *Scale-location plot: should be random although it looks like the standardized residual increases with fitted value
-        * Residuals vs. Leverage: shows the Cook's distance (again Toyota Corolla, Chrysler Imperial show greater cook's distances than others); 
+        *The residual vs. fitted values is  more or less random
+        *The normal QQ plot should give a straight line
+        *Scale-location plot: should be random
+        * Residuals vs. Leverage: shows the Cook's distance 
+                -Toyota Corolla, Chrysler Imperial and Fiat seem to be outliers
 
 
 
