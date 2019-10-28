@@ -1,0 +1,10 @@
+---
+title: "qz1"
+output: html_document
+---
+
+        *Q1: Ans: Traning and test set
+        *Q2: Ans: our algorithm may be overfitting the training data....
+        *Q3 Ans:60% in training, 40 in testing
+        *Q4 Ans: root mean squared error
+        *Q5 Ans: 9%
