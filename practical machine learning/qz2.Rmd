@@ -1,0 +1,131 @@
+---
+title: "qz2"
+author: "Tanya"
+date: "10/28/2019"
+output: html_document
+---
+
+This document tracks all the work done for quiz 2 - practical machine learning
+
+#Q1 
+ans: 
+
+adData = data.frame(diagnosis,predictors)
+testIndex = createDataPartition(diagnosis, p = 0.50,list=FALSE)
+training = adData[-testIndex,]
+testing = adData[testIndex,]
+
+#Q2 
+```{r}
+library(AppliedPredictiveModeling)
+data(concrete)
+library(caret)
+set.seed(1000)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+```
+
+```{r}
+head(training)
+```
+
+
+```{r}
+#library(Hmisc)
+cut_y<-cut2(training$Age,g=3)
+
+table(cut_y)
+```
+
+```{r}
+ggplot(data=training,aes(rownames(training),training$CompressiveStrength))+
+        geom_jitter(aes(color=cut_y))
+
+```
+
+#Q3
+
+```{r}
+library(AppliedPredictiveModeling)
+data(concrete)
+library(caret)
+set.seed(1000)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+```
+
+```{r}
+qplot(concrete$Superplasticizer)
+```
+```{r}
+summary(concrete$Superplasticizer)
+```
+
+ans: there are values of zero.... 
+
+# Q4
+
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+
+```{r}
+numpc<-3
+
+library(dplyr)
+training.IL<-dplyr::select(training,starts_with("IL"))
+preProcess(training.IL,method = "pca",thresh = 0.8)
+```
+
+
+ans: 7 
+
+#Q5
+
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+
+```{r}
+library(e1071)
+new_training<-data.frame(dplyr::select(training,starts_with("IL")),training$diagnosis)
+new_testing<-data.frame(select(testing,starts_with("IL")),testing$diagnosis)
+
+
+##PC method 
+preProc<-preProcess(new_training[,-13],method = "pca",thresh = 0.8)
+trainPC<-predict(preProc,new_training[,-13])
+trainPC<-data.frame(trainPC,training$diagnosis) #adding diagnosis to the training PC data
+modelFitPC<-train(training.diagnosis~.,method="glm",data=trainPC)
+
+
+testPC<-predict(preProc,new_testing)
+confusionMatrix(testing$diagnosis,predict(modelFitPC,testPC))
+
+```
+
+PC method, accuracy 0.72 
+
+next, try non PC method
+
+```{r}
+NoPCFit<-train(training.diagnosis~.,method="glm",data=new_training)
+confusionMatrix(new_testing$testing.diagnosis,predict(NoPCFit,new_testing[,-13]))
+```
+
