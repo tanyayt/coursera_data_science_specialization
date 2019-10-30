@@ -1,0 +1,141 @@
+---
+title: "Quiz 3 - Practical Machine Learning"
+author: "Tanya"
+date: "10/30/2019"
+output: html_document
+---
+# Package versions
+```{r}
+packageVersion("AppliedPredictiveModeling")
+```
+```{r}
+packageVersion("caret")
+```
+```{r}
+packageVersion("ElemStatLearn")
+```
+
+```{r}
+packageVersion("pgmm")
+```
+
+```{r}
+packageVersion("rpart")
+```
+
+```{r load_data}
+library(AppliedPredictiveModeling)
+data(segmentationOriginal)
+```
+
+# Task 1 Subset the data into training and testing
+```{r}
+table(segmentationOriginal$Case)
+```
+```{r}
+training<-segmentationOriginal[segmentationOriginal$Case=="Train",]
+testing<-segmentationOriginal[segmentationOriginal$Case=="Test",]
+```
+
+# Task 2 set seed and fit CART to predict Class with rpart method
+```{r}
+summary(training$Class)
+```
+```{r}
+set.seed(125)
+MODEL1<-caret::train(Class~.,data = training,method = "rpart") 
+fancyRpartPlot(MODEL1$finalModel)
+```
+
+rpart generates classification and regression trees 
+
+for a: PS
+b. WS
+c. PS
+d. can't predict 
+
+#Q2
+if K is small, fewer groups in the data set; smaller K, smaller variance less bias; 
+
+ans: The bias is larger and the variance is smaller. Under leave one out cross validation K is equal to the sample size.
+ 
+
+#Q3 
+
+```{r}
+library(pgmm);data(olive)
+olive<-olive[,-1]
+summary(olive$Area)
+```
+```{r}
+#str(olive)
+MODELOLIVE<-train(Area~.,data = olive,method="rpart")
+fancyRpartPlot(MODELOLIVE$finalModel)
+```
+
+```{r}
+NEWDATA<-as.data.frame(t(colMeans(olive)))
+predict(MODELOLIVE$finalModel,NEWDATA)
+```
+
+
+#Q4 
+
+prep:
+```{r}
+library(ElemStatLearn)
+data(SAheart)
+set.seed(8484)
+train = sample(1:dim(SAheart)[1],size=dim(SAheart)[1]/2,replace=F)
+trainSA = SAheart[train,]
+testSA = SAheart[-train,]
+```
+
+build the model
+```{r}
+trainSA$chd<-as.factor(trainSA$chd)
+testSA$chd<-as.factor(testSA$chd)
+set.seed(13234)
+MODELSA<-train(chd~age+alcohol+obesity+tobacco+typea+ldl,data=trainSA,method="glm",family="binomial")
+
+missClass = function(values,prediction){sum(((prediction > 0.5)*1) != values)/length(values)}
+
+```
+
+misclassification error for training set
+```{r}
+predictedvalues<-predict(MODELSA$finalModel,trainSA)
+missClass(trainSA$chd,predictedvalues)
+```
+
+```{r}
+predictedvaluesTEST<-predict(MODELSA$finalModel,testSA)
+missClass(testSA$chd,predictedvaluesTEST)
+```
+the closest is training 0.31 amd test 0.35 
+
+#Q5 
+
+```{r}
+library(ElemStatLearn)
+data(vowel.train)
+data(vowel.test)
+```
+
+```{r}
+vowel.train$y<-as.factor(vowel.train$y)
+vowel.test$y<-as.factor(vowel.test$y)
+```
+
+```{r}
+set.seed(33833)
+modelRF <- randomForest(y~.,data=vowel.train)
+order(caret::varImp(modelRF),decreasing=TRUE)
+```
+
+
+```{r}
+varImpPlot(modelRF)
+```
+
+
