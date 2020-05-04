@@ -1,0 +1,133 @@
+---
+title: "quiz 4"
+author: "Tanya"
+date: "10/30/2019"
+output: html_document
+---
+
+#1 
+```{r}
+library(ElemStatLearn)
+data(vowel.train)
+data(vowel.test)
+vowel.test$y<-as.factor(vowel.test$y)
+vowel.train$y<-as.factor(vowel.train$y)
+```
+
+
+
+```{r}
+set.seed(33833)
+MODELBOOST<-caret::train(y~.,method="gbm",data=vowel.train,verbose=FALSE)
+
+```
+
+```{r}
+predictedtest<-predict(MODELBOOST,newdata=vowel.test)
+accuracyboost<-confusionMatrix(predictedtest,vowel.test$y) #boost method accuracy 53.9% 
+```
+
+```{r}
+set.seed(33833)
+MODELNONBOOST<-caret::train(y~.,method="rf",data=vowel.train)
+predictedtestNB<-predict(MODELNONBOOST,newdata=vowel.test)
+accuracyrf<-confusionMatrix(predictedtestNB,vowel.test$y) # accuracy 59.96% 
+```
+
+```{r}
+accuracyboost$overall["Accuracy"]
+accuracyrf$overall["Accuracy"]
+```
+
+```{r}
+agreement_accuracy<-confusionMatrix(predictedtest,predictedtestNB)
+agreement_accuracy$overall["Accuracy"]
+```
+
+
+#2
+
+```{r}
+library(caret)
+
+library(gbm)
+
+set.seed(3433)
+
+library(AppliedPredictiveModeling)
+
+data(AlzheimerDisease)
+
+adData = data.frame(diagnosis,predictors)
+
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+
+training = adData[ inTrain,]
+
+testing = adData[-inTrain,]
+```
+
+```{r}
+set.seed(62433)
+modelrf<-caret::train(diagnosis~.,method="rf",data=training)
+modelboost<-caret::train(diagnosis~.,method="gbm",data=training,verbose=FALSE)
+modellda<-caret::train(diagnosis~.,method="lda",data=training)
+
+predictrf<-predict(modelrf,newdata=testing)
+predictboost<-predict(modelboost,newdata=testing)
+predictlda<-predict(modellda,newdata=testing)
+
+accu.rf<-confusionMatrix(predictrf,testing$diagnosis)$overall["Accuracy"]
+accu.boost<-confusionMatrix(predictboost,testing$diagnosis)$overall["Accuracy"]
+accu.lda<-confusionMatrix(predictlda,testing$diagnosis)$overall["Accuracy"]
+
+combDF<-data.frame(predictrf,predictboost,predictlda,diagnosis=testing$diagnosis)
+combModel<-caret::train(diagnosis~.,method="rf",data=combDF)
+predictComb<-predict(combModel,combDF)
+
+```
+
+```{r}
+accu.rf
+accu.boost
+accu.lda
+
+```
+
+
+```{r}
+accu.comb<-confusionMatrix(predictComb,testing$diagnosis)
+accu.comb$overall["Accuracy"]
+```
+
+stacked accuracy is better than the other three 
+
+#3
+
+```{r}
+set.seed(3523)
+
+library(AppliedPredictiveModeling)
+
+data(concrete)
+
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+
+training = concrete[ inTrain,]
+
+testing = concrete[-inTrain,]
+```
+
+```{r}
+set.seed(233)
+modFit<-caret::train(CompressiveStrength ~ ., method="lasso", data=training)
+plot.enet(modFit$finalModel, xvar = "penalty", use.color = TRUE)
+```
+
+
+#4
+
+
+#5
+
+

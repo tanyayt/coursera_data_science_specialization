@@ -1,0 +1,117 @@
+---
+title: "course project"
+author: "Tanya"
+date: "10/30/2019"
+output: html_document
+---
+# TO DO 
+
+testing data doesn't follow the exact order of variables...so review and steps cleaning testing data; the rpart method needs to be enhanced? how? 
+
+
+# Summary
+
+        * The data contains activity measurements of a group of subjects and the goal of the project is to use accelerometer data on the:
+                - belt 
+                -forearm
+                -arm
+                -dumbell
+to quantify and qualify the activities. More information can be found [here](http://groupware.les.inf.puc-rio.br/har) in the Weight Lifting Exercise Dataset
+
+Class A corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes. Participants were supervised by an experienced weight lifter to make sure the execution complied to the manner they were supposed to simulate. The exercises were performed by six male participants aged between 20-28 years, with little weight lifting experience. We made sure that all participants could easily simulate the mistakes in a safe and controlled manner by using a relatively light dumbbell (1.25kg).
+
+Read more: http://groupware.les.inf.puc-rio.br/har#ixzz63zxFk11A
+
+# Data Source
+
+        *The data for this project comes from this [source](http://groupware.les.inf.puc-rio.br/har). 
+
+# Data Pre-Processing
+## Load Data
+```{r}
+trainingdata<-read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv",
+                       header=TRUE,colClasses = "character")
+
+testingdata<-read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv",
+                      header=TRUE,colClasses = "character")
+```
+
+```{r}
+table(trainingdata$classe)
+```
+```{r}
+dim(trainingdata)
+```
+
+The training set has 160 variables
+```{r}
+#which function returns the position of the elements (column number or row number)
+ColRemove<-which(colSums(is.na(trainingdata)|trainingdata=="")/nrow(trainingdata)>0.5)
+trainingdata_clean<-trainingdata[,-ColRemove]
+testingdata_clean<-testingdata[,-ColRemove]
+```
+```{r}
+head(trainingdata_clean)
+```
+
+Only X, user_name, timestamp,new_window, classes will be characters
+
+```{r}
+colnames(trainingdata_clean)
+```
+```{r}
+trainingdata_clean[,7:59]<-lapply(trainingdata_clean[,7:59],as.numeric)
+testingdata_clean[,7:59]<-lapply(testingdata_clean[,7:59],as.numeric)
+```
+
+```{r}
+trainingdata_clean[,c(2,5,6,60)]<-lapply(trainingdata_clean[,c(2,5,6,60)],as.factor)
+testingdata_clean[,c(2,5,6,60)]<-lapply(testingdata_clean[,c(2,5,6,60)],as.factor)
+
+```
+
+```{r}
+head(trainingdata_clean)
+```
+
+```{r}
+colnames(trainingdata_clean)
+```
+
+remove irrelavent columns
+```{r}
+trainingdata_final<-trainingdata_clean[,c(2,6:60)]
+testingdata_final<-testingdata_clean[,c(2,6:60)]
+```
+
+
+# Build PCA [IP - may not proceed]
+```{r}
+#trainingPCA<-prcomp(trainingdata_final[,c(4:56)],scale=TRUE)
+#screeplot(trainingPCA,type = "lines")
+```
+The scree plot suggests that only two PCs will be sufficient
+# Decision Tree Model 
+
+```{r}
+TREEMODEL<-train(classe~.,method="rpart",data=trainingdata_final)
+```
+```{r fig.height=10}
+library(rattle)
+fancyRpartPlot(TREEMODEL$finalModel)
+```
+
+```{r}
+predictedtraining<-predict(TREEMODEL,trainingdata_final)
+predictedtesting<-predict(TREEMODEL,testingdata_final)
+#confusion matrix for training
+confusionMatrix(predictedtraining,trainingdata_final$classe)
+```
+```{r}
+confusionMatrix(predictedtesting,testingdata_final$clas)
+```
+
+
+# Results
+
+# COnclusion

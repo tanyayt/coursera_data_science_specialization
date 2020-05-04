@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+swissLMs.R
+elimination.R
+show4calls.R
+vifSims.R

@@ -9,3 +9,7 @@ e.g.2 pa3_data (folder)
 # Progress
 
 2020-04-23 Re-working on Lexical Scope assignment
+
+
+# Reminder
+File -> New Text -> Save as .md -> Name it as README.md (no need to knit)
