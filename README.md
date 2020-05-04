@@ -18,8 +18,9 @@ Not Started
         - Course 3, Getting and Cleaning data, DONE 
         - Course 4, Exploratory Data Analysis, DONE 
         - Course 5, Reproducible Research, DONE
+       ------------------------------------------------------------------
         - Course 6, Statistical Inference, IP, starting from the quizzes
-        - Course 7, - not started yet
-        - Course 8, - not started yet
-        - Course 9, - not started yet 
-        - Course 10, - not started yet
+        - Course 7, - IP
+        - Course 8, - IP
+        - Course 9, - IP
+        - Course 10, - IP
